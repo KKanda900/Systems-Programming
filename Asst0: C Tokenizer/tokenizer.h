@@ -1,6 +1,3 @@
-#ifndef HELLO_WORLD_H
-#define HELLO_WORLD_H
-
 typedef enum toktype_
 {
     WORD,
@@ -10,12 +7,11 @@ typedef enum toktype_
     C_OPERATOR
 } TokenTypes;
 
-typedef struct _TokenNode_ {
+typedef struct _Tok_ {
 	char* data;
-	struct _TokenNode_ * next;
+    int pointer;
 	TokenTypes names;
-} TokenNode;
+} Token;
 
-void makeStringToken(char *input, char*storage);
+char* getRidOfDelims(char *input, char*storage);
 
-#endif

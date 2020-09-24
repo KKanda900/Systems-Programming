@@ -4,15 +4,20 @@
 #include <ctype.h>
 #include "tokenizer.h"
 
-void makeStringToken(char *input, char*storage)
+/* void identifyToken(Token storedString) {
+    for(int j = 0; j < strlen(storedString.data); j++){
+
+    }
+} */
+
+//This seperate the words given by the input so once it finds a space it will use the words that were already built in to storage to create the token in the get Token function
+char *getRidOfDelims(char *input, char *storage)
 {
     int j;
     for (j = 0; j < strlen(input); j++)
     {
-        if (isspace(input[j]))
+        if (isspace(input[j]) || input[j] == '\t' || input[j] == '\v' || input[j] == '\n' || input[j] == '\r')
         {
-            printf("%s\n", storage);
-            j++;
             continue;
         }
 
@@ -23,6 +28,7 @@ void makeStringToken(char *input, char*storage)
             break;
         }
     }
+    return storage;
 }
 
 int main(int argc, char **argv)
@@ -41,6 +47,7 @@ int main(int argc, char **argv)
     }
 
     char *input = NULL;
+    char *copyInput = NULL;
     int length = 0;
     if (argv[1] != NULL)
     {
@@ -48,10 +55,12 @@ int main(int argc, char **argv)
         input = argv[1];
         //printf("The input string is: %s\n", input);
     }
+    strcpy(copyInput, input);
 
-    char*storage = malloc((length+1)*sizeof(char));
-    makeStringToken(input, storage);
+    Token storedString; storedString.data = malloc((length + 1) * sizeof(char));
+    storedString.data = getRidOfDelims(copyInput, storedString.data);
+    printf("%s\n", storedString.data);
 
-    free(storage);
+    free(storedString.data);
     return EXIT_SUCCESS;
 }
