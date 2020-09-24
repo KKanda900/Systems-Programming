@@ -4,16 +4,15 @@
 #include <ctype.h>
 #include "tokenizer.h"
 
-void makeStringToken(char *input, char*storage, TokenNode*front)
+void makeStringToken(char *input, char*storage)
 {
     int j;
     for (j = 0; j < strlen(input); j++)
     {
         if (isspace(input[j]))
         {
-            front = addNode(front, storage);
+            printf("%s\n", storage);
             j++;
-            front = front->next;
             continue;
         }
 
@@ -50,8 +49,8 @@ int main(int argc, char **argv)
         //printf("The input string is: %s\n", input);
     }
 
-    TokenNode*front = NULL; char*storage = malloc((length+1)*sizeof(char));
-    makeStringToken(input, storage, front);
+    char*storage = malloc((length+1)*sizeof(char));
+    makeStringToken(input, storage);
 
     free(storage);
     return EXIT_SUCCESS;

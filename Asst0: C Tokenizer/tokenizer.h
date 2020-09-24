@@ -16,10 +16,6 @@ typedef struct _TokenNode_ {
 	TokenTypes names;
 } TokenNode;
 
-TokenNode* addNode(TokenNode*front, char*data);
-
-TokenNode* deleteNode(TokenNode*front, char*data);
-
-void makeStringToken(char *input, char*storage, TokenNode*front);
+void makeStringToken(char *input, char*storage);
 
 #endif
