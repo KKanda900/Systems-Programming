@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "LinkedList.h"
+#include "tokenizer.h"
 
 /* Implementation of Linked List in C*/
 
-void free_list(Node *front)
+void free_list(TokenNode *front)
 {
 	// Like for other linked list functions, check if the front is null or not
 	if (front == NULL){
@@ -12,11 +12,11 @@ void free_list(Node *front)
 	}
 
 	//Set a pointer so we can iterate nicely
-	Node *ptr = front;
+	TokenNode *ptr = front;
 	while (ptr->next != NULL) 
 	{
 		// This would be like any traversal but we are freeing each memory of the pointers
-		Node *tmp = ptr->next;
+		TokenNode *tmp = ptr->next;
 		free(ptr); // like here
 		ptr = tmp;
 	}
@@ -27,9 +27,9 @@ void free_list(Node *front)
 
 // Using the front as a input and given a data input that you want to store it will make a newNode
 // and store that to the front of the list
-Node *addNode(Node *front, char *data)
+TokenNode *addNode(TokenNode *front, char *data)
 {
-	Node *newNode = malloc(sizeof(Node)); //malloc space for the newNode that you are creating
+	TokenNode *newNode = malloc(sizeof(TokenNode)); //malloc space for the newNode that you are creating
 	newNode->data = data;
 	newNode->next = NULL;
 
@@ -50,7 +50,7 @@ Node *addNode(Node *front, char *data)
 	return front;
 }
 
-Node* deleteNode(Node *front, char *data)
+TokenNode* deleteNode(TokenNode *front, char *data)
 {
 	// Check if the front of the list is actually there
 	if (front == NULL){
@@ -59,8 +59,8 @@ Node* deleteNode(Node *front, char *data)
 
 	/* Now we can set two pointers a ptr to the front and a pointer to the previous
 	element. Which we will use to iterate through the list */
-	Node *ptr = front;
-	Node *prev = NULL;
+	TokenNode *ptr = front;
+	TokenNode *prev = NULL;
 
 	// Now we iterate through the linked list so that we can delete the elements using the condition
 	// ptr != NULL which we will traverse later using ptr = ptr->next
@@ -92,9 +92,9 @@ Node* deleteNode(Node *front, char *data)
 }
 
 // Meant for testing purposes, to see if all the nodes print out or if there is a memory leak somewhere
-void traverseList(Node *front)
+void traverseList(TokenNode *front)
 {
-	Node *ptr = front;
+	TokenNode *ptr = front;
 	while (ptr != NULL)
 	{
 		printf("%s \t", (*ptr).data); // Print out the corresponding data
