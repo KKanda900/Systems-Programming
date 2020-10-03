@@ -1,6 +1,6 @@
 TARGET = tokenizer
 CC     = gcc
-CFLAGS = -g -std=c99 -Wall -Wvla -Werror -fsanitize=address,undefined
+CFLAGS = 
 
 $(TARGET): $(TARGET).c
 	$(CC) $(CFLAGS) $^ -o $@

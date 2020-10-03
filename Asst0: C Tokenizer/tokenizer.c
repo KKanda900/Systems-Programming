@@ -75,7 +75,7 @@ It contains two fields: the char* to store the data of the token and the enum To
 typedef struct _Tok_ {
 	char* data; // This should store the input you give in argv[1] into a individual string without any delimiters
 	TokenType names; 
-} Token;
+} Token; 
 
 /*
 
