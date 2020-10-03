@@ -3,6 +3,14 @@
 #include <string.h>
 #include <ctype.h>
 
+// DO NOT LEAVE OUT BRACKETS WHEN USING THESE MARCO!!
+
+// Add char at current index to currToken.data and change Token name to t.
+#define addCharChangeTo(t) strncat(currToken.data, &c, sizeof(char)); index++; currToken.names = t
+
+// Print out the only char as Token t.
+#define printAs(t) currToken.names = t; currToken = tokenPrinter(currToken); break
+
 /*
  * Here is a enum we use to define an easier way to identify the token type for all 48 token,
  * includes a Modulus token "%" which is not in RefCard.
@@ -46,6 +54,7 @@ typedef struct Token {
 /*
  * These are the reserved keywords specified in C.
  */
+
 const char* reserved[32] =
         {"auto", "break", "case", "char",
          "const", "continue", "default", "do",
@@ -102,148 +111,69 @@ Token tokenPrinter(Token t) {
     char* typename;
     switch (t.names)
     {
-        case WORD:
-            typename = "word";
-            break;
-        case DEC_INT:
-            typename = "decimal integer";
-            break;
-        case OCT_INT:
-            typename = "octal integer";
-            break;
-        case HEX_INT:
-            typename = "hexadecimal integer";
-            break;
-        case FLOAT:
-            typename = "float";
-            break;
-        case MINUS: // -
-            typename = "minus/subtract operator";
-            break;
-        case STRUCT_PTR: // ->
-            typename = "structure pointer";
-            break;
-        case DECRE: // --
-            typename = "decrement";
-            break;
-        case MINUS_EQ: // -=
-            typename = "minus equals";
-            break;
-        case NEGATE: // !
-            typename = "negate";
-            break;
-        case NEQ_TEST: // !=
-            typename = "inequality test";
-            break;
-        case GREATER: // >
-            typename = "greater than test";
-            break;
-        case SHIFT_R: // >>
-            typename = "shift right";
-            break;
-        case GREATER_EQ: // >=
-            typename = "greater than or equal test";
-            break;
-        case SHIFT_R_EQ: // >>=
-            typename = "shift right equals";
-            break;
-        case LESS: // <
-            typename = "less than test";
-            break;
-        case SHIFT_L: // <<
-            typename = "shift left";
-            break;
-        case LESS_EQ: // <=
-            typename = "less than or equal";
-            break;
-        case SHIFT_L_EQ: // <<=
-            typename = "shift left equals";
-            break;
-        case XOR: // ^
-            typename = "bitwise XOR";
-            break;
-        case XOR_EQ: // ^=
-            typename = "bitwise XOR equals";
-            break;
-        case OR: // |
-            typename = "bitwise OR";
-            break;
-        case LOG_OR: // ||
-            typename = "logical OR";
-            break;
-        case BIT_OR: // |=
-            typename = "bitwise OR equals";
-            break;
-        case ADD: // +
-            typename = "addition";
-            break;
-        case INCRE: // ++
-            typename = "increment";
-            break;
-        case ADD_EQ: // +=
-            typename = "plus equals";
-            break;
-        case DIV: // /
-            typename = "division";
-            break;
-        case DIV_EQ: // /=
-            typename = "divide equals";
-            break;
-        case AND: // &
-            typename = "AND/address operator";
-            break;
-        case LOG_AND: // &&
-            typename = "logical AND";
-            break;
-        case BIT_AND: // &=
-            typename = "bitwise AND";
-            break;
-        case ASSIGN: // =
-            typename = "assignment";
-            break;
-        case EQ: // ==
-            typename = "equality test";
-            break;
-        case MULTI: // *
-            typename = "multiply/dereference operator";
-            break;
-        case MULTI_EQ: // *=
-            typename = "times equals";
-            break;
-        case MOD: // % (not on ref card)
-            typename = "modulus";
-            break;
-        case MOD_EQ: // %=
-            typename = "mod equals";
-            break;
-        case PAREN_L: // (
-            typename = "left parenthesis";
-            break;
-        case PAREN_R: // )
-            typename = "right parenthesis";
-            break;
-        case BRAC_L: // [
-            typename = "left bracket";
-            break;
-        case BRAC_R: // ]
-            typename = "right bracket";
-            break;
-        case STRUCT_MEM: // .
-            typename = "structure member";
-            break;
-        case COMMA: // ,
-            typename = "comma";
-            break;
-        case ONES_COMP: // ~
-            typename = "1s complement";
-            break;
-        case COND_T: // ?
-            typename = "conditional true";
-            break;
-        case COND_F: // :
-            typename = "conditional false";
-            break;
-        default:
+        case WORD: typename = "word"; break;
+        case DEC_INT: typename = "decimal integer"; break;
+        case OCT_INT: typename = "octal integer"; break;
+        case HEX_INT: typename = "hexadecimal integer"; break;
+        case FLOAT: typename = "float"; break;
+
+        case MINUS: typename = "minus/subtract operator"; break; // -
+        case STRUCT_PTR: typename = "structure pointer"; break; // ->
+        case DECRE: typename = "decrement"; break; // --
+        case MINUS_EQ: typename = "minus equals"; break; // -=
+
+        case NEGATE: typename = "negate"; break; // !
+        case NEQ_TEST: typename = "inequality test"; break; // !=
+
+        case GREATER: typename = "greater than test"; break; // >
+        case SHIFT_R: typename = "shift right"; break; // >>
+        case GREATER_EQ: typename = "greater than or equal test"; break; // >=
+        case SHIFT_R_EQ: typename = "shift right equals"; break; // >>=
+
+        case LESS: typename = "less than test"; break;// <
+        case SHIFT_L: typename = "shift left"; break; // <<
+        case LESS_EQ: typename = "less than or equal"; break; // <=
+        case SHIFT_L_EQ: typename = "shift left equals"; break; // <<=
+
+        case XOR: typename = "bitwise XOR"; break; // ^
+        case XOR_EQ: typename = "bitwise XOR equals"; break; // ^=
+
+        case OR: typename = "bitwise OR"; break; // |
+        case LOG_OR: typename = "logical OR"; break; // ||
+        case BIT_OR: typename = "bitwise OR equals"; break; // |=
+
+        case ADD: typename = "addition"; break; // +
+        case INCRE: typename = "increment"; break; // ++
+        case ADD_EQ: typename = "plus equals"; break; // +=
+
+        case DIV: typename = "division"; break; // /
+        case DIV_EQ: typename = "divide equals"; break; // /=
+
+        case AND: typename = "AND/address operator"; break; // &
+        case LOG_AND: typename = "logical AND"; break; // &&
+        case BIT_AND: typename = "bitwise AND"; break; // &=
+
+        case ASSIGN: typename = "assignment"; break; // =
+        case EQ: typename = "equality test"; break; // ==
+
+        case MULTI: typename = "multiply/dereference operator"; break; // *
+        case MULTI_EQ: typename = "times equals"; break; // *=
+
+        case MOD: typename = "modulus"; break; // % (not on ref card)
+        case MOD_EQ: typename = "mod equals"; break; // %=
+
+        case PAREN_L: typename = "left parenthesis"; break; // (
+        case PAREN_R: typename = "right parenthesis"; break; // )
+
+        case BRAC_L: typename = "left bracket"; break; // [
+        case BRAC_R: typename = "right bracket"; break; // ]
+
+        case STRUCT_MEM: typename = "structure member"; break; // .
+        case COMMA: typename = "comma"; break; // ,
+        case ONES_COMP: typename = "1s complement"; break; // ~
+        case COND_T: typename = "conditional true"; break; // ?
+        case COND_F: typename = "conditional false"; break; // :
+        default: // Should never fall into this case
             printf("Not suppose to conclude a new token.\n");
             return (Token){0};
     }
@@ -287,106 +217,50 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
             case MINUS:
                 switch (c)
                 {
-                    case '>':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = STRUCT_PTR;
-                        break;
-                    case '-':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = DECRE;
-                        break;
-                    case '=':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = MINUS_EQ;
-                        break;
+                    case '>': addCharChangeTo(STRUCT_PTR); break;
+                    case '-': addCharChangeTo(DECRE); break;
+                    case '=': addCharChangeTo(MINUS_EQ); break;
                     default: ;
                 }
                 currToken = tokenPrinter(currToken);
                 break;
             case NEGATE:
-                if (c=='=')
-                {
-                    strncat(currToken.data, &c, sizeof(char));
-                    index++;
-                    currToken.names = NEQ_TEST;
-                }
+                if (c=='=') {addCharChangeTo(NEQ_TEST);}
                 currToken = tokenPrinter(currToken);
                 break;
             case GREATER:
                 switch (c)
                 {
-                    case '<':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = SHIFT_R;
-                        break;
-                    case '=':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = GREATER_EQ;
-                    default:
-                        currToken = tokenPrinter(currToken);
+                    case '<': addCharChangeTo(SHIFT_R); break;
+                    case '=': addCharChangeTo(GREATER_EQ);
+                    default: currToken = tokenPrinter(currToken);
                 }
                 break;
             case SHIFT_R:
-                if (c=='=')
-                {
-                    strncat(currToken.data, &c, sizeof(char));
-                    index++;
-                    currToken.names = SHIFT_R_EQ;
-                }
+                if (c=='=') {addCharChangeTo(SHIFT_R_EQ);}
                 currToken = tokenPrinter(currToken);
                 break;
             case LESS:
                 switch (c)
                 {
-                    case '<':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = SHIFT_L;
-                        break;
-                    case '=':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = LESS_EQ;
-                    default:
-                        currToken = tokenPrinter(currToken);
+                    case '<': addCharChangeTo(SHIFT_L); break;
+                    case '=': addCharChangeTo(LESS_EQ);
+                    default: currToken = tokenPrinter(currToken);
                 }
                 break;
             case SHIFT_L:
-                if (c=='=')
-                {
-                    strncat(currToken.data, &c, sizeof(char));
-                    index++;
-                    currToken.names = SHIFT_L_EQ;
-                }
+                if (c=='=') {addCharChangeTo(SHIFT_L_EQ);}
                 currToken = tokenPrinter(currToken);
                 break;
             case XOR:
-                if (c=='=')
-                {
-                    strncat(currToken.data, &c, sizeof(char));
-                    index++;
-                    currToken.names = XOR_EQ;
-                }
+                if (c=='=') {addCharChangeTo(XOR_EQ);}
                 currToken = tokenPrinter(currToken);
                 break;
             case OR:
                 switch (c)
                 {
-                    case '|':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = LOG_OR;
-                        break;
-                    case '=':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = BIT_OR;
-                        break;
+                    case '|': addCharChangeTo(LOG_OR); break;
+                    case '=': addCharChangeTo(BIT_OR); break;
                     default: ;
                 }
                 currToken = tokenPrinter(currToken);
@@ -394,71 +268,35 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
             case ADD:
                 switch (c)
                 {
-                    case '+':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = INCRE;
-                        break;
-                    case '=':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = ADD_EQ;
-                        break;
+                    case '+': addCharChangeTo(INCRE); break;
+                    case '=': addCharChangeTo(ADD_EQ); break;
                     default: ;
                 }
                 currToken = tokenPrinter(currToken);
                 break;
             case DIV:
-                if (c=='=')
-                {
-                    strncat(currToken.data, &c, sizeof(char));
-                    index++;
-                    currToken.names = DIV_EQ;
-                }
+                if (c=='=') {addCharChangeTo(DIV_EQ);}
                 currToken = tokenPrinter(currToken);
                 break;
             case AND:
                 switch (c)
                 {
-                    case '&':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = LOG_AND;
-                        break;
-                    case '=':
-                        strncat(currToken.data, &c, sizeof(char));
-                        index++;
-                        currToken.names = BIT_AND;
-                        break;
+                    case '&': addCharChangeTo(LOG_AND); break;
+                    case '=': addCharChangeTo(BIT_AND); break;
                     default: ;
                 }
                 currToken = tokenPrinter(currToken);
                 break;
             case ASSIGN:
-                if (c=='=')
-                {
-                    strncat(currToken.data, &c, sizeof(char));
-                    index++;
-                    currToken.names = EQ;
-                }
+                if (c=='=') {addCharChangeTo(EQ);}
                 currToken = tokenPrinter(currToken);
                 break;
             case MULTI:
-                if (c=='=')
-                {
-                    strncat(currToken.data, &c, sizeof(char));
-                    index++;
-                    currToken.names = MULTI_EQ;
-                }
+                if (c=='=') {addCharChangeTo(MULTI_EQ);}
                 currToken = tokenPrinter(currToken);
                 break;
             case MOD:
-                if (c=='=')
-                {
-                    strncat(currToken.data, &c, sizeof(char));
-                    index++;
-                    currToken.names = MOD_EQ;
-                }
+                if (c=='=') {addCharChangeTo(MOD_EQ);}
                 currToken = tokenPrinter(currToken);
                 break;
             case DEC_INT:
@@ -556,80 +394,28 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                 else if (isdigit(c)) currToken.names = DEC_INT;
                 else {
                     switch (c) {
-                        case '(':
-                            currToken.names = PAREN_L;
-                            currToken = tokenPrinter(currToken);
-                            break;
-                        case ')':
-                            currToken.names = PAREN_R;
-                            currToken = tokenPrinter(currToken);
-                            break;
-                        case '[':
-                            currToken.names = BRAC_L;
-                            currToken = tokenPrinter(currToken);
-                            break;
-                        case ']':
-                            currToken.names = BRAC_R;
-                            currToken = tokenPrinter(currToken);
-                            break;
-                        case '.':
-                            currToken.names = STRUCT_MEM;
-                            currToken = tokenPrinter(currToken);
-                            break;
-                        case ',':
-                            currToken.names = COMMA;
-                            currToken = tokenPrinter(currToken);
-                            break;
-                        case '~':
-                            currToken.names = ONES_COMP;
-                            currToken = tokenPrinter(currToken);
-                            break;
-                        case '?':
-                            currToken.names = COND_T;
-                            currToken = tokenPrinter(currToken);
-                            break;
-                        case ':':
-                            currToken.names = COND_F;
-                            currToken = tokenPrinter(currToken);
-                            break;
-                        case '-':
-                            currToken.names = MINUS;
-                            break;
-                        case '!':
-                            currToken.names = NEGATE;
-                            break;
-                        case '>':
-                            currToken.names = GREATER;
-                            break;
-                        case '<':
-                            currToken.names = LESS;
-                            break;
-                        case '^':
-                            currToken.names = XOR;
-                            break;
-                        case '|':
-                            currToken.names = OR;
-                            break;
-                        case '+':
-                            currToken.names = ADD;
-                            break;
-                        case '/':
-                            currToken.names = DIV;
-                            break;
-                        case '&':
-                            currToken.names = AND;
-                            break;
-                        case '=':
-                            currToken.names = ASSIGN;
-                            break;
-                        case '*':
-                            currToken.names = MULTI;
-                            break;
-                        case '%':
-                            currToken.names = MOD;
-                            break;
-                        default:
-                            free(currToken.data);
+                        case '(': printAs(PAREN_L);
+                        case ')': printAs(PAREN_R);
+                        case '[': printAs(BRAC_L);
+                        case ']': printAs(BRAC_R);
+                        case '.': printAs(STRUCT_MEM);
+                        case ',': printAs(COMMA);
+                        case '~': printAs(ONES_COMP);
+                        case '?': printAs(COND_T);
+                        case ':': printAs(COND_F);
+                        case '-': currToken.names = MINUS; break;
+                        case '!': currToken.names = NEGATE; break;
+                        case '>': currToken.names = GREATER; break;
+                        case '<': currToken.names = LESS; break;
+                        case '^': currToken.names = XOR; break;
+                        case '|': currToken.names = OR; break;
+                        case '+': currToken.names = ADD; break;
+                        case '/': currToken.names = DIV; break;
+                        case '&': currToken.names = AND; break;
+                        case '=': currToken.names = ASSIGN; break;
+                        case '*': currToken.names = MULTI; break;
+                        case '%': currToken.names = MOD; break;
+                        default: free(currToken.data); // Treat as whitespace
                     }
                 }
         }
