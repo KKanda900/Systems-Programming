@@ -2,17 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "tokenizer.h"
-
-/*
-
-Here are some function prototypes used in our tokenizer implementation
-
-*/
-
-Token generateToken(Token t);
-int isopt(char c);
-void printToken(int inputlen, char*input, Token currToken);
 
 /*
 
@@ -79,7 +68,7 @@ typedef enum TokenType
 This struct type is used to hold the token that we are going to print and the identifying token type that 
 we will print out in the printToken function.
 
-It contains two
+It contains two fields: the char* to store the data of the token and the enum Tokentype to identify the token
 
 */
 
@@ -87,6 +76,16 @@ typedef struct _Tok_ {
 	char* data; // This should store the input you give in argv[1] into a individual string without any delimiters
 	TokenType names; 
 } Token;
+
+/*
+
+Here are some function prototypes used in our tokenizer implementation
+
+*/
+
+Token generateToken(Token t);
+int isopt(char c);
+void printToken(int inputlen, char*input, Token currToken);
 
 /*
 
