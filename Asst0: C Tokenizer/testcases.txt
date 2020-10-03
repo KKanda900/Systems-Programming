@@ -86,6 +86,18 @@ division: "/"
 hexadecimal integer: "0xaee"
 word: "wef32"
 
+./tokenizer "0xrhfwhe"
+decimal integer: "0"
+word: "xrhfwhe"
 
+./tokenizer "0x"
+decimal integer: "0"
+word: "x"
 
+./tokenizer "3e+3"
+float: "3e+3"
 
+./tokenizer "3e+"
+decimal integer: "3"
+word: "e"
+addition: "+"
