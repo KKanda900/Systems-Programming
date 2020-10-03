@@ -47,7 +47,7 @@ typedef enum TokenType
  */
 
 typedef struct Token {
-	char* data; // This should store the input you give in argv[1] into a individual string without any delimiters
+	char* data;
 	TokenType names; 
 } Token;
 
@@ -302,10 +302,10 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
             case DEC_INT:
                 if (strlen(currToken.data)==1 && currToken.data[0]=='0')
                 {
-                    if (c=='x' || c=='X')
+                    if ((c=='x' || c=='X') && index+1 < inputlen && isxdigit(input[index+1]))
                     {
                         currToken.names = HEX_INT;
-                        putdigit = 1;
+                        putdigit = 2;
                     }
                     else if (c>='0' && c<='7')
                     {
@@ -314,15 +314,23 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                     }
                 }
                 if (isdigit(c)) putdigit = 1;
-                else if (c=='.')
+                else if (c=='.' && index+1 < inputlen && isdigit(input[index+1]))
                 {
                     currToken.names =FLOAT;
-                    putdigit = 1;
+                    putdigit = 2;
                 }
-                if (putdigit)
+                else if ((c=='e' || c=='E') && !hasexponent &&
+                         index+2 < inputlen && (input[index+1]=='+' || input[index+1]=='-') &&
+                         isdigit(input[index+2]))
                 {
-                    strncat(currToken.data, &c, sizeof(char));
-                    index++;
+                    currToken.names =FLOAT;
+                    putdigit = 3;
+                    hasexponent = 1;
+                }
+                if (putdigit > 0)
+                {
+                    strncat(currToken.data, &input[index], putdigit*sizeof(char));
+                    index += putdigit;
                     putdigit = 0;
                 }
                 else currToken = tokenPrinter(currToken);
@@ -334,9 +342,9 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                     index++;
                     if (c > '7') currToken.names = DEC_INT;
                 }
-                else if (c=='.')
+                else if (c=='.' && index+1 < inputlen && isdigit(input[index+1]))
                 {
-                    strncat(currToken.data, &c, sizeof(char));
+                    strncat(currToken.data, &input[index], 2*sizeof(char));
                     index++;
                     currToken.names = FLOAT;
                 }
@@ -348,14 +356,6 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                     strncat(currToken.data, &c, sizeof(char));
                     index++;
                 }
-                else if (strlen(currToken.data) == 2) // No hex digit after 0x
-                {
-                    index--;
-
-                    free(currToken.data);
-                    currToken = (Token){0};
-                    printf("decimal integer: \"0\"\n");
-                }
                 else currToken = tokenPrinter(currToken);
                 break;
             case FLOAT:
@@ -365,11 +365,12 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                     index++;
                 }
                 else if ((c=='e' || c=='E') && !hasexponent &&
-                    index+1 < inputlen && (input[index+1]=='+' || input[index+1]=='-'))
+                    index+2 < inputlen && (input[index+1]=='+' || input[index+1]=='-') &&
+                    isdigit(input[index+2]))
                 {
                     hasexponent = 1;
-                    strncat(currToken.data, &input[index], 2*sizeof(char));
-                    index += 2;
+                    strncat(currToken.data, &input[index], 3*sizeof(char));
+                    index += 3;
                 }
                 else
                 {
