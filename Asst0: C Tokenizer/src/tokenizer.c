@@ -439,7 +439,7 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                         case '*': currToken.names = MULTI; break;
                         case '%': currToken.names = MOD; break;
                         case '\'': currToken.names = QUOTE; break;
-                        case '\\': currToken.names = BAD_TOK; break;
+                        case '\\': currToken.names = BAD_TOK; break; 
                         default: free(currToken.data); // Treat as whitespace
                     }
                 }

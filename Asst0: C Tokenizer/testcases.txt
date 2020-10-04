@@ -87,6 +87,25 @@ hexadecimal integer: "0xaee"
 word: "wef32"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+./tokenizer "0xrhfwhe"
+decimal integer: "0"
+word: "xrhfwhe"
+
+./tokenizer "0x"
+decimal integer: "0"
+word: "x"
+
+./tokenizer "3e+3"
+float: "3e+3"
+
+./tokenizer "3e+"
+decimal integer: "3"
+word: "e"
+addition: "+"
+
+>>>>>>> 013086ad945ed659926859b3f6fec8232cbfe30b
 ./tokenizer "0xrhfwhe"
 decimal integer: "0"
 word: "xrhfwhe"
@@ -154,6 +173,7 @@ word: "x"
 octal integer: "034"
 word: "x344440"
 decimal integer: "0123456789"
+<<<<<<< HEAD
 =======
 ./tokenizer "0xrhfwhe"
 decimal integer: "0"
@@ -171,3 +191,5 @@ decimal integer: "3"
 word: "e"
 addition: "+"
 >>>>>>> 3363d68f8708d395b3930335e404c3bc82031dd4
+=======
+>>>>>>> 013086ad945ed659926859b3f6fec8232cbfe30b
