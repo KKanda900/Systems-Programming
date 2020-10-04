@@ -75,13 +75,10 @@ int isopt(char c);
 void tokenScanner(int inputlen, char*input, Token currToken);
 
 /*
- * The isopt function will return 1 (true) if there was an operator that was found or return 0 (false) if there wasn't
- * any of the corresponding operators found.
+ * The isopt function will return 1 (true) if the char is an C operator, or return 0 (false) if it's not.
  *
- * The corresponding operators that it is comparing the character you provided with is
+ * The C operators specified are the following:
  * "!%&()*+,-./:<=>?[]^|~".
- *
- * The isopt function takes a character as a argument.
  */
 
 int isopt(char c)
@@ -96,11 +93,12 @@ int isopt(char c)
 
 /*
  * The tokenPrinter function determines the Token's type name from the given enum Token type name and
- * prints out the Token the string generates in the form:
+ * prints out the Token. The string generates in the form:
  * <token type>: "<token name>"
  *
  * The tokenPrinter function takes in the struct Token which holds the data of the token its going to print
  * out and the name of the Token type.
+ * A token of type NEW should never be passed into this function.
  *
  * If the Token is a WORD it will go into a separate statement where it will determine if it's a special
  * keyword and print out the corresponding word or keyword. (Extra credit part 1)
@@ -222,7 +220,10 @@ Token tokenPrinter(Token t) {
  */
 
 void tokenScanner(int inputlen, char*input, Token currToken) {
-    int hasexponent = 0; int putdigit = 0; int index = 0; int condition = 0;
+    int hasexponent = 0; // A boolean that indicates if the current FLOAT token has a exponent part included
+    int putdigit = 0; // A int that indicates how many char starting from index belongs to the current token
+    int index = 0; // A pointer to the current position of the examined char in the input string
+    int condition = 0; // A boolean that indicates a quote
     while (index < inputlen) {
         char c = input[index];
         switch (currToken.names) {
@@ -454,11 +455,14 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
 
 
 /*
-The main function will take one string argument (in argv[1]) where argv[1]
-contains the input string that is needed to be tokenized. 
-It prints out the token using tokenScanner function from left to right where
-each token that is generated will be on a seperate line.
-*/
+ * The main function will take one string argument (in argv[1]) where argv[1]
+ * contains the input string that is needed to be tokenized.
+ *
+ * It prints out the token using tokenScanner function from left to right where
+ * each token that is generated will be on a separate line.
+ *
+ * The function returns EXIT_SUCCESS if the job is done, returns EXIT_FAILURE immediately when it fails to malloc.
+ */
 
 int main(int argc, char **argv) {
 
@@ -477,7 +481,7 @@ int main(int argc, char **argv) {
     int inputlen = (int)strlen(argv[1]);
     char* input = (char*) malloc((inputlen+1) * sizeof(char));
     if (input == NULL) return EXIT_FAILURE;
-    strcpy(input, argv[1]);
+    strcpy(input, argv[1]); // Still copy the input string from command line although we'll not edit it
     Token token;
 
     tokenScanner(inputlen, input, token);
