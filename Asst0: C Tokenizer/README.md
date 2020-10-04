@@ -10,7 +10,7 @@ ming language.</p>
 
 <h2>  2 Usage </h2>
 
- <p>./tokenizer<string input> .</p>
+ <p>./tokenizer <<string input>> .</p>
 
 <h2> 3 Description of Algorithm </h2>
 
