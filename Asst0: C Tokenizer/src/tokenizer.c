@@ -36,7 +36,8 @@ typedef enum TokenType
     PAREN_L, PAREN_R,
     BRAC_L, BRAC_R,
     STRUCT_MEM, COMMA, ONES_COMP,
-    COND_T, COND_F
+    COND_T, COND_F, QUOTE,
+    BAD_TOK // This token is for skipping purposes for comments
 } TokenType;
 
 /*
@@ -173,6 +174,11 @@ Token tokenPrinter(Token t) {
         case ONES_COMP: typename = "1s complement"; break; // ~
         case COND_T: typename = "conditional true"; break; // ?
         case COND_F: typename = "conditional false"; break; // :
+
+        //extra credit cases
+        case QUOTE: typename = "Quote Block"; break;
+        case BAD_TOK: typename=""; break;
+
         default: // Should never fall into this case
             printf("Not suppose to conclude a new token.\n");
             return (Token){0};
@@ -190,7 +196,13 @@ Token tokenPrinter(Token t) {
         }
     }
 
-    if (printed == 0) printf("%s: \"%s\"\n", typename, t.data); // Or already printed as a special keyword
+    if (printed == 0) {
+        if(typename == "") {
+            
+        } else {
+            printf("%s: \"%s\"\n", typename, t.data); // Or already printed as a special keyword
+        }
+    }
     free(t.data);
     return (Token){0};
 }
@@ -276,7 +288,8 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                 break;
             case DIV:
                 if (c=='=') {addCharChangeTo(DIV_EQ);}
-                else if(c=='/'){} 
+                if(c=='/') { addCharChangeTo(BAD_TOK);} 
+                if(c=='*') {addCharChangeTo(BAD_TOK);}
                 currToken = tokenPrinter(currToken);
                 break;
             case AND:
@@ -294,6 +307,7 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                 break;
             case MULTI:
                 if (c=='=') {addCharChangeTo(MULTI_EQ);}
+                if(c=='/') {addCharChangeTo(BAD_TOK);}
                 currToken = tokenPrinter(currToken);
                 break;
             case MOD:
@@ -387,6 +401,13 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                     index++;
                 }
                 break;
+            case QUOTE:
+                if(c == '\'' && isspace(c)) currToken = tokenPrinter(currToken);
+                else {
+                    strncat(currToken.data, &c, sizeof(char));
+                    index++;
+                } 
+                break;
             default:
                 currToken.data = (char*) malloc((inputlen - index + 1)*sizeof(char));
                 if (currToken.data == NULL) return exit(1);
@@ -417,6 +438,8 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                         case '=': currToken.names = ASSIGN; break;
                         case '*': currToken.names = MULTI; break;
                         case '%': currToken.names = MOD; break;
+                        case '\'': currToken.names = QUOTE; break;
+                        case '\\': currToken.names = BAD_TOK; break;
                         default: free(currToken.data); // Treat as whitespace
                     }
                 }
