@@ -154,26 +154,6 @@ octal integer: "034"
 word: "x344440"
 decimal integer: "0123456789"
 
-./tokenizer "ch[]%=% ! 234^23 2330x23 ab34556 r{}(<)<<)"
-word: "ch"
-left bracket: "["
-right bracket: "]"
-mod equals: "%="
-modulus: "%"
-negate: "!"
-decimal integer: "234"
-bitwise XOR: "^"
-decimal integer: "23"
-decimal integer: "2330"
-word: "x23"
-word: "ab34556"
-word: "r{}"
-left parenthesis: "("
-less than test: "<"
-right parenthesis: ")"
-shift left: "<<"
-right parenthesis: ")"
-
 ./tokenizer "()() (()) ))) (((())))) ()()() [] [[[]]]]]] [[[]]]]]]]]]]]]]]]]]]]]]]]]][]]][[[]"
 left parenthesis: "(" 
 right parenthesis: ")"
@@ -564,8 +544,6 @@ while: "while"
 word: "unionswitchforgoto"
 Quote Block: "'now we end the test case'"
 
-./tokenizer "array[xyz ] += pi 3.14159e-10 today is a beautiful day 0x4356abdc 0777 [] numbers 972 0x972 A8 0XA8 XA8 0972 072 3.1 03.1 x3.1 0x3.1 30x1.x +,++,+++,++++,+++++,++=,+++== letskeeptestingforever : 423424 033326 0xae324 0XaEE324 0.12333 .1432423 woahmoretesting:01eeee73then/0xaeewef32 woahmoretesting:01eeee73then/0xaeewef32 0x 3e+33e+ 2e+[
-0794432e-[][] 0x 0x 0x3444444ef h3llo 3e-43 3e4 0 03443 0acxcc 0x344ghdkword 0word if else while for 0 023 0eth 0e10 0e-1004465533abc 0x34 0x 034x344440 0123456789 ()() (()) ))) (((())))) ()()() [] [[[]]]]]] [[[]]]]]]]]]]]]]]]]]]]]]]]]][]]][[[] . . .. .-> -> > sizeof,.-> ->>>>><<>> sizeof.->, ! ~ ~~ <<>><<~~>>~<><~>! ^^>><<>> // / /* */ / || \& && &&|||&| ?:|::|| ++== != !===!== <<==>>==< = == += <<= >>= <> !=>> * &(& - ^= hell34432omy name3120x12838 02333 03233a 0233 0x234422a [][] // /* hello this is a test 123 ,a., 0x23a /* */ 0x12233jk ()() ** 8 ()()() /**/ te233ing23oxx 0230x2344 2e-34 24434e-13 0.2330004 0003412.130 <<>> <<><<><><>>>>>>>>>>> &&& ^^^^\] ! 3434 ~ /=-/ *&^/ ^=340x23 0x230000effmo~[][] 3e3 this is the ending portion if else auto break case char float for extern while unionswitchforgoto now we end the test case hell34432omy name3120x12838 02333 03233a 0233 0x234422a [][] // /* 'hello this is a test 123 ,a., 0x23a /* */ 0x12233jk ()() ** 8' ()()() /**/ te233ing23oxx 0230x2344 2e-34 24434e-13 0.2330004 0003412.130 <<>> <<><<><><>>>>>>>>>>> &&& ^^^^\] ! 3434 ~ /=-/ *&^/ ^=340x23 0x230000effmo~[][] 3e3 'this is the ending portion' if else auto break case char float for extern while unionswitchforgoto 'now we end the test case' "
 word: "array"
 left bracket: ""["        
 word: ""xyz"
@@ -1068,6 +1046,7 @@ extern: "extern"
 while: "while"
 word: "unionswitchforgoto"
 Quote Block: "'now we end the test case'"
+
 
 
 
