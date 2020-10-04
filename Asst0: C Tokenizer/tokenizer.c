@@ -231,7 +231,7 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
             case GREATER:
                 switch (c)
                 {
-                    case '<': addCharChangeTo(SHIFT_R); break;
+                    case '>': addCharChangeTo(SHIFT_R); break;
                     case '=': addCharChangeTo(GREATER_EQ);
                     default: currToken = tokenPrinter(currToken);
                 }
@@ -276,6 +276,7 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                 break;
             case DIV:
                 if (c=='=') {addCharChangeTo(DIV_EQ);}
+                else if(c=='/'){}
                 currToken = tokenPrinter(currToken);
                 break;
             case AND:
@@ -426,13 +427,11 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
 
 
 /*
-
 The main function will take one string argument (in argv[1]) where argv[1]
 contains the input string that is needed to be tokenized. 
 
 It prints out the token using tokenScanner function from left to right where
 each token that is generated will be on a seperate line.
-
 */
 
 int main(int argc, char **argv) {
