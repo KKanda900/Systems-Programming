@@ -222,7 +222,7 @@ Token tokenPrinter(Token t) {
  */
 
 void tokenScanner(int inputlen, char*input, Token currToken) {
-    int hasexponent = 0; int putdigit = 0; int index = 0;
+    int hasexponent = 0; int putdigit = 0; int index = 0; int condition = 0;
     while (index < inputlen) {
         char c = input[index];
         switch (currToken.names) {
@@ -402,7 +402,12 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                 }
                 break;
             case QUOTE:
-                if(c == '\'' && isspace(c)) currToken = tokenPrinter(currToken);
+                condition = (c == '\'');
+                if(condition == 1 || isopt(c)){
+                    strncat(currToken.data, &c, sizeof(char));
+                    currToken = tokenPrinter(currToken);
+                    index++;
+                }
                 else {
                     strncat(currToken.data, &c, sizeof(char));
                     index++;
@@ -439,7 +444,6 @@ void tokenScanner(int inputlen, char*input, Token currToken) {
                         case '*': currToken.names = MULTI; break;
                         case '%': currToken.names = MOD; break;
                         case '\'': currToken.names = QUOTE; break;
-                        case '\\': currToken.names = BAD_TOK; break; 
                         default: free(currToken.data); // Treat as whitespace
                     }
                 }
