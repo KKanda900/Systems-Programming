@@ -5,7 +5,7 @@
  <h2 align="center"> October 4, 2020 </h2>
 
 <h2> 1 Name of Program </h2>
- <p>tokenizer - tokenizes a string input to individual tokens built in the C program-
+ <p>tokenizer - tokenizes a string input to individual tokens built in the C program
 ming language.</p>
 
 <h2>  2 Usage </h2>
