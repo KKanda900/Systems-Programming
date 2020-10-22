@@ -1,12 +1,12 @@
-typedef struct Block
+typedef struct MetaData
 {
-    char metadata;
-    int free : 0; //returns 1 if its not free and 0 if its free
-    short byteSize : 12;
-    struct Block * next : NULL;
+    size_t size;
+    int free;
+    struct MetaData * next;
 } MyBlock;
 
 #define MEMORY_SIZE 4096
+#define BLOCK_SIZE sizeof(MyBlock)
 
-#define malloc(x) mymalloc(x, __FILE__, __LINE__)
-#define free(x) myfree(x, __FILE__, __LINE__)
+#define malloc(size) mymalloc(size, __FILE__, __LINE__)
+#define free(x) myfree(x, __FILE__, __LINE__) 

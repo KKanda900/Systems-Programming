@@ -1,11 +1,11 @@
-memgrind: memgrind.o mymalloc.o
-	gcc memgrind.o mymalloc.o -o memgrind
+CC = gcc
+CFLAGS = -Wall
 
-memgrind.o: memgrind.c mymalloc.h
-	gcc -c memgrind.c
+memgrind: memgrind.o mymalloc.o 
+	$(CC) $(CFLAGS) memgrind.o mymalloc.o -o memgrind
 
-mymalloc.o: mymalloc.c mymalloc.h
-	gcc -c mymalloc.c
+memgrind.o: mymalloc.h
+mymalloc.o: mymalloc.h
 
-clean: 
-	rm -f memgrind *.o
+clean:
+	rm -f project *.o
