@@ -1,2 +1,4 @@
-
+*.o
 Asst0: C Tokenizer/tokenizer
+Asst1: ++Malloc/memgrind
+Asst1: ++Malloc/test
