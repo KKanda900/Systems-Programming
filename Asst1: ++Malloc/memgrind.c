@@ -54,7 +54,7 @@ struct timeval testC() {
     gettimeofday(&start_t, NULL);
 
     for (int i = 0; i < 240; i++) {
-        if (malloc_count <= free_count || doMalloc[i]) {
+        if (malloc_count <= free_count || (doMalloc[i] && malloc_count < 120)) {
             p[malloc_count] = malloc(1);
             malloc_count++;
         }
@@ -72,8 +72,8 @@ struct timeval testC() {
 float avgTime(struct timeval* times) {
     float result = 0;
     for (int i = 0; i < REPEAT; i++) {
-        result += (float)times[i].tv_sec;
-        result += (float)times[i].tv_usec/(float)1000000;
+        result += (float)times[i].tv_sec*(float)1000;
+        result += (float)times[i].tv_usec/(float)1000;
     }
     return result/(float)REPEAT;
 }
@@ -87,8 +87,8 @@ int main(int argc, char**argv) {
         resultB[i] = testB();
         resultC[i] = testC();
     }
-    printf("Mean time for workload A: %.6f\n", avgTime(resultA));
-    printf("Mean time for workload B: %.6f\n", avgTime(resultB));
-    printf("Mean time for workload C: %.6f\n", avgTime(resultC));
+    printf("Mean time for workload A: %.3fms\n", avgTime(resultA));
+    printf("Mean time for workload B: %.3fms\n", avgTime(resultB));
+    printf("Mean time for workload C: %.3fms\n", avgTime(resultC));
     return 0;
 }
