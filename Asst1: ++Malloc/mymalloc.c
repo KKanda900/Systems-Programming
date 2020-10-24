@@ -92,7 +92,7 @@ void deleteBlock(MyBlock *currBlock)
     MyBlock *prev;
     while (ptr != NULL)
     {
-        if (ptr->free == 1 && ptr->next->free == 1)
+        if (ptr->free == 0 && ptr->next->free == 0)
         {
             ptr->size += (ptr->next->size + BLOCK_SIZE);
             ptr->next = ptr->next->next;
@@ -106,10 +106,6 @@ void myfree(void *p, const char *file, int line)
 {
 
     MyBlock*mem = (MyBlock*)p;
-
-    if(mem->free == 0){
-        fprintf(stderr, "This memory is already freed %s %d\n", file, line);
-    }
 
     void *start = (void *)MemoryBlock;
     void *end = (void *)(MemoryBlock + MEMORY_SIZE);
