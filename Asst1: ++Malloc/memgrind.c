@@ -3,7 +3,9 @@
 #include "mymalloc.h"
 
 int main(int argc, char**argv) {
-    char * ptr = (char*)malloc(sizeof(100));
+    char * ptr = (char*)malloc(4);
     printf("%p\n", ptr);
+    free(ptr);
+    free(ptr);
     return 0;
 }
