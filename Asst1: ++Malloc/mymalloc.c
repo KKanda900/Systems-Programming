@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "mymalloc.h"
 
-<<<<<<< HEAD
 // Here are some macros used to access the total amount of memory in MemoryBlock and the block size of the metadata
 #define MEMORY_SIZE 4096
 #define BLOCK_SIZE sizeof(MyBlock)
@@ -14,31 +13,20 @@ static char MemoryBlock[MEMORY_SIZE]; //Memory Size is 4096
  * The clean function is used in memgrind to reset MemoryBlock between each test case. 
  */
 
-=======
-#define MEMORY_SIZE 4096
-#define BLOCK_SIZE sizeof(MyBlock)
-
-static char MemoryBlock[MEMORY_SIZE]; //Memory Size is 4096
-
->>>>>>> b96167152bc194316289db594a4c1789b05d087f
 void clean()
 {
     for (int i = 0; i < MEMORY_SIZE; ++i) MemoryBlock[i] = 0;
 }
 
-<<<<<<< HEAD
 /*
  * The ptrIsInMem function checks if that pointer provided is within the MemoryBlock
  */
 
-=======
->>>>>>> b96167152bc194316289db594a4c1789b05d087f
 int ptrIsInMem(void* ptr)
 {
     return ptr >= (void*)MemoryBlock && ptr <= (void*)MemoryBlock + MEMORY_SIZE - BLOCK_SIZE;
 }
 
-<<<<<<< HEAD
 /*
  * The next function is used in the mymalloc function that is used to find the next block
  * fill after the front of the MemoryBlock has been initialized. 
@@ -50,9 +38,6 @@ int ptrIsInMem(void* ptr)
  * front of the MemoryBlock.
  */
 
-=======
-// Returns a free block with enough size, or the last block
->>>>>>> b96167152bc194316289db594a4c1789b05d087f
 MyBlock *next(MyBlock *front, size_t size)
 {
     MyBlock* ptr = front;
@@ -174,7 +159,6 @@ void cleanFragments()
     while (ptrIsInMem(ptr))
     {
         if (ptr->free)
-<<<<<<< HEAD
         {
             if (start == NULL) start = ptr;
             else
@@ -185,18 +169,6 @@ void cleanFragments()
         }
         else // Not free starting from here
         {
-=======
-        {
-            if (start == NULL) start = ptr;
-            else
-            {
-                end = ptr;
-                prev->next = NULL;
-            }
-        }
-        else // Not free starting from here
-        {
->>>>>>> b96167152bc194316289db594a4c1789b05d087f
             if (start != NULL && end != NULL) // end is NULL means start is an isolated free block, no action needed
             {
                 start->size = (size_t)((void*)ptr - (void*)start - BLOCK_SIZE);
@@ -244,8 +216,4 @@ void myfree(void *p, const char *file, int line)
 
     deleteBlock(mem);
     cleanFragments();
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> b96167152bc194316289db594a4c1789b05d087f
