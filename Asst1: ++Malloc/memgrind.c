@@ -15,7 +15,9 @@ struct timeval testA()
 
     for (int i = 0; i < 120; i++)
     {
+        if (DEBUG) printf("%d", i);
         void* p = malloc(1);
+        if (DEBUG) printf("%d", i);
         free(p);
     }
 
@@ -33,8 +35,16 @@ struct timeval testB()
     struct timeval res_t;
     gettimeofday(&start_t, NULL);
 
-    for (int i = 0; i < 120; i++) p[i] = malloc(1);
-    for (int i = 0; i < 120; i++) free(p[i]);
+    for (int i = 0; i < 120; i++)
+    {
+        if (DEBUG) printf("%d", i);
+        p[i] = malloc(1);
+    }
+    for (int i = 0; i < 120; i++)
+    {
+        if (DEBUG) printf("%d", i);
+        free(p[i]);
+    }
 
     gettimeofday(&end_t, NULL);
     timersub(&end_t, &start_t, &res_t);
@@ -58,11 +68,13 @@ struct timeval testC()
     {
         if (malloc_count <= free_count || (doMalloc[i] && malloc_count < 120))
         {
+            if (DEBUG) printf("%d", malloc_count);
             p[malloc_count] = malloc(1);
             malloc_count++;
         }
         else
         {
+            if (DEBUG) printf("%d", free_count);
             free(p[free_count]);
             free_count++;
         }
@@ -106,13 +118,13 @@ struct timeval testE()
     {
         if (malloc_count <= free_count || (doMalloc[i] && malloc_count < 120))
         {
-            printf("%d", malloc_count);
+            if (DEBUG) printf("%d", malloc_count);
             p[malloc_count] = malloc(mallocSize[malloc_count]);
             malloc_count++;
         }
         else
         {
-            printf("%d", free_count);
+            if (DEBUG) printf("%d", free_count);
             free(p[free_count]);
             free_count++;
         }
@@ -139,16 +151,16 @@ int main() {
     struct timeval resultD[REPEAT];
     struct timeval resultE[REPEAT];
     for (int i = 0; i < REPEAT; i++) {
-        resultA[i] = testA();
-        resultB[i] = testB();
-        resultC[i] = testC();
+//        resultA[i] = testA();
+//        resultB[i] = testB();
+//        resultC[i] = testC();
 //        resultD[i] = testD();
-//        resultE[i] = testE();
+        resultE[i] = testE();
     }
-    printf("Mean time for workload A: %.3fms\n", avgTime(resultA));
-    printf("Mean time for workload B: %.3fms\n", avgTime(resultB));
-    printf("Mean time for workload C: %.3fms\n", avgTime(resultC));
+//    printf("Mean time for workload A: %.3fms\n", avgTime(resultA));
+//    printf("Mean time for workload B: %.3fms\n", avgTime(resultB));
+//    printf("Mean time for workload C: %.3fms\n", avgTime(resultC));
 //    printf("Mean time for workload D: %.3fms\n", avgTime(resultD));
-//    printf("Mean time for workload E: %.3fms\n", avgTime(resultE));
+    printf("Mean time for workload E: %.3fms\n", avgTime(resultE));
     return 0;
 }
