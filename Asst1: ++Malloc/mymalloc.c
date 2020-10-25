@@ -10,7 +10,8 @@ MyBlock *next(MyBlock *block)
 
     while (ptr->next != NULL)
     {
-        if(ptr->free != 0){
+        if (ptr->free != 0)
+        {
             break;
         }
         ptr = ptr->next;
@@ -19,9 +20,9 @@ MyBlock *next(MyBlock *block)
     return ptr;
 }
 
-void fitNextBlock(MyBlock *ptr, size_t size)
+void fitNextBlock(MyBlock *ptr, unsigned short size)
 {
-    MyBlock *newNode = (void *)((void*)ptr + size + BLOCK_SIZE);
+    MyBlock *newNode = (void *)((void *)ptr + size + BLOCK_SIZE);
     newNode->size = ptr->size - size - BLOCK_SIZE;
     newNode->free = 1;
     newNode->next = ptr->next;
@@ -35,18 +36,16 @@ void *mymalloc(size_t size, const char *file, int line)
 
     MyBlock *front = (MyBlock *)MemoryBlock;
 
-    if (size > MEMORY_SIZE - BLOCK_SIZE)
+    if ((unsigned short) size > MEMORY_SIZE - BLOCK_SIZE)
     {
-        DEBUG;
         fprintf(stderr, "requested size for allocation is too large %s, %d\n", file, line);
         return NULL;
     }
 
-    // front won't be null so check if the size of the front is allocated or not 
+    // front won't be null so check if the size of the front is allocated or not
 
     if (front->size == 0)
     {
-        DEBUG;
         front->size = MEMORY_SIZE - BLOCK_SIZE;
         front->free = 1;
         front->next = NULL;
@@ -55,26 +54,24 @@ void *mymalloc(size_t size, const char *file, int line)
     // Let's find the next node to fill
     MyBlock *ptr = front;
     ptr = next(ptr);
-    
+
     void *returnPTR;
-    
-    if (ptr->size > size + BLOCK_SIZE)
+
+    if (ptr->size > TOTAL_SIZE)
     {
-        DEBUG;
-        fitNextBlock(ptr, size);
+        fitNextBlock(ptr, (unsigned short) size);
         returnPTR = ptr++;
-        return returnPTR;
-    } 
-    else if (ptr->size == size + BLOCK_SIZE)
+        return (void*)returnPTR;
+    }
+    else if (ptr->size == TOTAL_SIZE)
     {
-        DEBUG;
         ptr->free = 1;
         returnPTR = ptr++;
-        return returnPTR;
+        return (void*)returnPTR;
     }
     else
     {
-        DEBUG;
+
         fprintf(stderr, "No More Space %s %d\n", file, line);
         return NULL;
     }
@@ -82,11 +79,11 @@ void *mymalloc(size_t size, const char *file, int line)
 
 void deleteBlock(MyBlock *currBlock)
 {
-    MyBlock *ptr = (MyBlock *)MemoryBlock;
+    MyBlock *ptr = currBlock;
     MyBlock *prev = NULL;
-    while (ptr->next != NULL)
+    while (ptr != NULL)
     {
-        if (ptr->free == 1 && ptr->next->free == 1)
+        if (ptr->free != 0 && ptr->next->free != 0)
         {
             ptr->size += (ptr->next->size + BLOCK_SIZE);
             ptr->next = ptr->next->next;
@@ -108,7 +105,7 @@ void myfree(void *p, const char *file, int line)
         fprintf(stderr, "Nothing in the main memory %s %d\n", file, line);
     }
 
-    if (mem->free == 1)
+    if (mem->free == 0)
     {
         fprintf(stderr, "Memory is already freed %s %d\n", file, line);
     }
@@ -119,8 +116,8 @@ void myfree(void *p, const char *file, int line)
     // Checks if p is within range of the MemoryBlock
     if (p > start || p <= end)
     {
-        mem->free = 0; 
-        --mem;
+        mem->free = 0;
+        mem--;
         deleteBlock(mem);
         /* printf("freed\n"); */
     }

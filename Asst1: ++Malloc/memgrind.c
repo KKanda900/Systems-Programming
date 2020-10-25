@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include "mymalloc.h"
+#include <time.h>
 
 #define REPEAT 50
 
@@ -13,7 +14,7 @@ struct timeval testA() {
 
     for (int i = 0; i < 120; i++) {
         void* p = malloc(1);
-        free(p);
+        
     }
 
     gettimeofday(&end_t, NULL);
@@ -59,7 +60,6 @@ struct timeval testC() {
             malloc_count++;
         }
         else {
-            free(p[free_count]);
             free_count++;
         }
     }
@@ -79,16 +79,8 @@ float avgTime(struct timeval* times) {
 }
 
 int main(int argc, char**argv) {
-    struct timeval resultA[REPEAT];
-    struct timeval resultB[REPEAT];
-    struct timeval resultC[REPEAT];
-    for (int i = 0; i < REPEAT; i++) {
-        resultA[i] = testA();
-        resultB[i] = testB();
-        resultC[i] = testC();
-    }
-    printf("Mean time for workload A: %.3fms\n", avgTime(resultA));
-    printf("Mean time for workload B: %.3fms\n", avgTime(resultB));
-    printf("Mean time for workload C: %.3fms\n", avgTime(resultC));
+    void* ptr = malloc(123);
+    printf("%p\n", ptr);
+    free(ptr);
     return 0;
 }
