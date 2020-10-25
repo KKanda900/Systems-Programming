@@ -22,7 +22,7 @@ void fitNextBlock(MyBlock *ptr, size_t size)
 {
     ptr->size = size;
     ptr->free = 0;
-    if (ptr->next == NULL && (void*)ptr + size + BLOCK_SIZE <= (void*)MemoryBlock + MEMORY_SIZE)
+    if (ptr->next == NULL && (void*)ptr + size + BLOCK_SIZE*2 <= (void*)MemoryBlock + MEMORY_SIZE)
     { // If this is the last free block
         MyBlock *newNode = (void*)((void*)ptr + size + BLOCK_SIZE);
         newNode->size = (size_t)((void*)MemoryBlock + MEMORY_SIZE - (void*)newNode - BLOCK_SIZE);
