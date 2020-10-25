@@ -93,6 +93,37 @@ void deleteBlock(MyBlock *currBlock)
     }
 }
 
+void cleanFragments()
+{
+    MyBlock* ptr = (MyBlock*)MemoryBlock;
+    MyBlock* start = NULL;
+    MyBlock* end = NULL;
+    while (ptr != NULL)
+    {
+        if (ptr->free)
+        {
+            if (start == NULL) start = ptr;
+            else end = ptr;
+        }
+        else
+        {
+            if (start != NULL && end != NULL)
+            {
+                start->size = (size_t)((void*)ptr - (void*)start - BLOCK_SIZE);
+                start->next = ptr;
+            }
+            start = NULL;
+            end = NULL;
+        }
+        ptr = ptr->next;
+    }
+    if (start != NULL && end != NULL)
+    { // It's free all the way till the end
+        start->next = NULL;
+        start->size = (size_t)((void*)MemoryBlock + MEMORY_SIZE - BLOCK_SIZE);
+    }
+}
+
 void myfree(void *p, const char *file, int line)
 {
 
@@ -120,6 +151,7 @@ void myfree(void *p, const char *file, int line)
         --mem;
         deleteBlock(mem);
         /* printf("freed\n"); */
+        cleanFragments();
     }
     else if (p < start || p > end)
     {
