@@ -8,4 +8,4 @@ memgrind.o: mymalloc.h
 mymalloc.o: mymalloc.h
 
 clean:
-	rm -f project *.o
+	rm -f project *.o memgrind

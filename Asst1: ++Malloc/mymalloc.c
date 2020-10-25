@@ -3,31 +3,40 @@
 
 static char MemoryBlock[MEMORY_SIZE]; //Memory Size is 4096
 
-// find the next available block
-MyBlock *next(MyBlock *block)
+// Returns a free block with enough size, or the last block
+MyBlock *next(MyBlock *block, size_t size)
 {
     MyBlock *ptr = block;
 
     while (ptr->next != NULL)
     {
-        if(ptr->free != 0){
-            break;
-        }
+        if (ptr->free != 0 && ptr->size >= size) break;
         ptr = ptr->next;
     }
 
     return ptr;
 }
 
+// Writes size info into ptr, and prepare the free block after if possible
 void fitNextBlock(MyBlock *ptr, size_t size)
 {
-    MyBlock *newNode = (void *)((void*)ptr + size + BLOCK_SIZE);
-    newNode->size = ptr->size - size - BLOCK_SIZE;
-    newNode->free = 1;
-    newNode->next = ptr->next;
     ptr->size = size;
     ptr->free = 0;
-    ptr->next = newNode;
+    if (ptr->next == NULL && (void*)ptr + size + BLOCK_SIZE <= (void*)MemoryBlock + MEMORY_SIZE)
+    { // If this is the last free block
+        MyBlock *newNode = (void*)((void*)ptr + size + BLOCK_SIZE);
+        newNode->size = (size_t)((void*)MemoryBlock + MEMORY_SIZE - (void*)newNode - BLOCK_SIZE);
+        newNode->free = 1;
+        ptr->next = newNode;
+    }
+    else if (ptr->next != NULL && (void*)ptr + size + BLOCK_SIZE*2 <= (void*)ptr->next)
+    { // If there's at least space for metadata in between
+        MyBlock *newNode = (void*)((void*)ptr + size + BLOCK_SIZE);
+        newNode->size = (void*)ptr->next - (void*)ptr - size - BLOCK_SIZE*2;
+        newNode->free = 1;
+        newNode->next = ptr->next;
+        ptr->next = newNode;
+    }
 }
 
 void *mymalloc(size_t size, const char *file, int line)
@@ -44,7 +53,7 @@ void *mymalloc(size_t size, const char *file, int line)
 
     // front won't be null so check if the size of the front is allocated or not 
 
-    if (front->size == 0)
+    if (front->size == 0 && front->free == 0)
     {
         DEBUG;
         front->size = MEMORY_SIZE - BLOCK_SIZE;
@@ -54,29 +63,17 @@ void *mymalloc(size_t size, const char *file, int line)
 
     // Let's find the next node to fill
     MyBlock *ptr = front;
-    ptr = next(ptr);
+    ptr = next(ptr, size);
     
-    void *returnPTR;
-    
-    if (ptr->size > size + BLOCK_SIZE)
-    {
-        DEBUG;
-        fitNextBlock(ptr, size);
-        returnPTR = ptr++;
-        return returnPTR;
-    } 
-    else if (ptr->size == size + BLOCK_SIZE)
-    {
-        DEBUG;
-        ptr->free = 1;
-        returnPTR = ptr++;
-        return returnPTR;
+    if (ptr->size < size || ptr->free != 1)
+    { // This is the last block, but still cannot allocate
+        fprintf(stderr, "No More Space %s %d\n", file, line);
+        return NULL;
     }
     else
     {
-        DEBUG;
-        fprintf(stderr, "No More Space %s %d\n", file, line);
-        return NULL;
+        fitNextBlock(ptr, size);
+        return ptr;
     }
 }
 
