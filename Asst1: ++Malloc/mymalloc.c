@@ -6,6 +6,11 @@
 
 static char MemoryBlock[MEMORY_SIZE]; //Memory Size is 4096
 
+void clean()
+{
+    for (int i = 0; i < MEMORY_SIZE; ++i) MemoryBlock[i] = 0;
+}
+
 int ptrIsInMem(void* ptr)
 {
     return ptr >= (void*)MemoryBlock && ptr <= (void*)(MemoryBlock + MEMORY_SIZE - BLOCK_SIZE);
@@ -29,7 +34,7 @@ void fitNextBlock(MyBlock *ptr, size_t size)
 {
     ptr->size = size;
     ptr->free = 0;
-    if (ptr->next == NULL && (void*)ptr + size + BLOCK_SIZE*2 <= (void*)MemoryBlock + MEMORY_SIZE)
+    if (ptr->next == NULL && ptrIsInMem((void*)ptr + size + BLOCK_SIZE))
     { // If this is the last free block
         MyBlock *newNode = (void*)((void*)ptr + size + BLOCK_SIZE);
         newNode->size = (size_t)((void*)MemoryBlock + MEMORY_SIZE - (void*)newNode - BLOCK_SIZE);

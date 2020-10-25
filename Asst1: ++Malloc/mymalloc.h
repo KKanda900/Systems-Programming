@@ -7,6 +7,7 @@ typedef struct MetaData
 
 void *mymalloc(size_t size, const char *file, int line);
 void myfree(void *p, const char *file, int line);
+void clean();
 
 #define DEBUG 1
 

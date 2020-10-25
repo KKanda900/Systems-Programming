@@ -8,6 +8,7 @@
 
 struct timeval testA()
 {
+    clean();
     struct timeval start_t;
     struct timeval end_t;
     struct timeval res_t;
@@ -28,6 +29,7 @@ struct timeval testA()
 
 struct timeval testB()
 {
+    clean();
     void* p[120];
 
     struct timeval start_t;
@@ -53,6 +55,7 @@ struct timeval testB()
 
 struct timeval testC()
 {
+    clean();
     void* p[120];
     int malloc_count = 0, free_count = 0;
     int doMalloc[240];
@@ -87,6 +90,7 @@ struct timeval testC()
 
 struct timeval testD()
 {
+    clean();
     struct timeval start_t;
     struct timeval end_t;
     struct timeval res_t;
@@ -101,6 +105,7 @@ struct timeval testD()
 
 struct timeval testE()
 {
+    clean();
     void* p[120];
     int malloc_count = 0, free_count = 0;
     int doMalloc[240], mallocSize[120];
@@ -151,6 +156,7 @@ int main() {
     struct timeval resultD[REPEAT];
     struct timeval resultE[REPEAT];
     for (int i = 0; i < REPEAT; i++) {
+        if (DEBUG) printf("round %d\n", i);
 //        resultA[i] = testA();
 //        resultB[i] = testB();
 //        resultC[i] = testC();
