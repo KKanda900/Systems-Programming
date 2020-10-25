@@ -139,16 +139,16 @@ int main() {
     struct timeval resultD[REPEAT];
     struct timeval resultE[REPEAT];
     for (int i = 0; i < REPEAT; i++) {
-//        resultA[i] = testA();
-//        resultB[i] = testB();
-//        resultC[i] = testC();
+        resultA[i] = testA();
+        resultB[i] = testB();
+        resultC[i] = testC();
 //        resultD[i] = testD();
-        resultE[i] = testE();
+//        resultE[i] = testE();
     }
-//    printf("Mean time for workload A: %.3fms\n", avgTime(resultA));
-//    printf("Mean time for workload B: %.3fms\n", avgTime(resultB));
-//    printf("Mean time for workload C: %.3fms\n", avgTime(resultC));
+    printf("Mean time for workload A: %.3fms\n", avgTime(resultA));
+    printf("Mean time for workload B: %.3fms\n", avgTime(resultB));
+    printf("Mean time for workload C: %.3fms\n", avgTime(resultC));
 //    printf("Mean time for workload D: %.3fms\n", avgTime(resultD));
-    printf("Mean time for workload E: %.3fms\n", avgTime(resultE));
+//    printf("Mean time for workload E: %.3fms\n", avgTime(resultE));
     return 0;
 }

@@ -1,25 +1,27 @@
 #include <stdio.h>
 #include "mymalloc.h"
 
+#define MEMORY_SIZE 4096
+#define BLOCK_SIZE sizeof(MyBlock)
+
 static char MemoryBlock[MEMORY_SIZE]; //Memory Size is 4096
+
+int ptrIsInMem(void* ptr)
+{
+    return ptr >= (void*)MemoryBlock && ptr <= (void*)(MemoryBlock + MEMORY_SIZE - BLOCK_SIZE);
+}
 
 // Returns a free block with enough size, or the last block
 MyBlock *next(MyBlock *front, size_t size)
 {
     MyBlock* ptr = front;
-    MyBlock* ret = NULL;
 
-    while (ptr <= (MyBlock*)((void*)MemoryBlock + MEMORY_SIZE - BLOCK_SIZE) && ptr->next != NULL)
+    while (ptrIsInMem(ptr) && ptr->next != NULL)
     {
-        if (ptr->free != 0 && ptr->size >= size)
-        {
-            ret = ptr;
-            break;
-        }
+        if (ptr->free == 1 && ptr->size >= size) break;
         ptr = ptr->next;
     }
-
-    return ret;
+    return ptr;
 }
 
 // Writes size info into ptr, and prepare the free block after if possible
@@ -46,7 +48,7 @@ void fitNextBlock(MyBlock *ptr, size_t size)
 
 void *mymalloc(size_t size, const char *file, int line)
 {
-    if (DEBUG) printf("    malloc(%d)\n", (int)size);
+    if (DEBUG) printf("\tmalloc(%d)\n", (int)size);
     MyBlock *front = (MyBlock *)MemoryBlock;
 
     if (size > MEMORY_SIZE - BLOCK_SIZE)
@@ -68,7 +70,7 @@ void *mymalloc(size_t size, const char *file, int line)
     MyBlock *ptr = front;
     ptr = next(ptr, size);
     
-    if (ptr->size < size || ptr->free != 1)
+    if (!ptrIsInMem(ptr) || ptr->size < size || ptr->free != 1)
     { // This is the last block, but still cannot allocate
         fprintf(stderr, "No More Space %s %d\n", file, line);
         return NULL;
@@ -98,7 +100,7 @@ void cleanFragments()
     MyBlock* ptr = (MyBlock*)MemoryBlock;
     MyBlock* start = NULL;
     MyBlock* end = NULL;
-    while (ptr != NULL && ptr <= (MyBlock*)((void*)MemoryBlock + MEMORY_SIZE - BLOCK_SIZE))
+    while (ptrIsInMem(ptr))
     {
         if (ptr->free)
         {
@@ -126,14 +128,14 @@ void cleanFragments()
 
 void myfree(void *p, const char *file, int line)
 {
-    if (DEBUG) printf("    free(%p)\n", p);
+    if (DEBUG) printf("\tfree(%p)\n", p);
     void *start = (void *)MemoryBlock;
     void *end = (void *)(MemoryBlock + MEMORY_SIZE);
 
     MyBlock *mem = (MyBlock *)p;
 
     // Checks if p is within range of the MemoryBlock
-    if (p < start || p > end)
+    if (!ptrIsInMem(mem))
     {
         fprintf(stderr, "This pointer does not exist in memory %s %d\n", file, line);
         return;
