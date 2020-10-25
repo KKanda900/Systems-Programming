@@ -4,17 +4,22 @@
 static char MemoryBlock[MEMORY_SIZE]; //Memory Size is 4096
 
 // Returns a free block with enough size, or the last block
-MyBlock *next(MyBlock *block, size_t size)
+MyBlock *next(MyBlock *front, size_t size)
 {
-    MyBlock *ptr = block;
+    MyBlock* ptr = front;
+    MyBlock* ret = NULL;
 
-    while (ptr->next != NULL)
+    while (ptr <= (MyBlock*)((void*)MemoryBlock + MEMORY_SIZE - BLOCK_SIZE) && ptr->next != NULL)
     {
-        if (ptr->free != 0 && ptr->size >= size) break;
+        if (ptr->free != 0 && ptr->size >= size)
+        {
+            ret = ptr;
+            break;
+        }
         ptr = ptr->next;
     }
 
-    return ptr;
+    return ret;
 }
 
 // Writes size info into ptr, and prepare the free block after if possible
@@ -41,12 +46,11 @@ void fitNextBlock(MyBlock *ptr, size_t size)
 
 void *mymalloc(size_t size, const char *file, int line)
 {
-
+    if (DEBUG) printf("    malloc(%d)\n", (int)size);
     MyBlock *front = (MyBlock *)MemoryBlock;
 
     if (size > MEMORY_SIZE - BLOCK_SIZE)
     {
-        DEBUG;
         fprintf(stderr, "requested size for allocation is too large %s, %d\n", file, line);
         return NULL;
     }
@@ -55,7 +59,6 @@ void *mymalloc(size_t size, const char *file, int line)
 
     if (front->size == 0 && front->free == 0)
     {
-        DEBUG;
         front->size = MEMORY_SIZE - BLOCK_SIZE;
         front->free = 1;
         front->next = NULL;
@@ -79,17 +82,14 @@ void *mymalloc(size_t size, const char *file, int line)
 
 void deleteBlock(MyBlock *currBlock)
 {
-    MyBlock *ptr = (MyBlock *)MemoryBlock;
-    MyBlock *prev = NULL;
-    while (ptr->next != NULL)
+    currBlock->free = 1;
+    if (currBlock->next != NULL)
     {
-        if (ptr->free == 1 && ptr->next->free == 1)
-        {
-            ptr->size += (ptr->next->size + BLOCK_SIZE);
-            ptr->next = ptr->next->next;
-        }
-        prev = ptr;
-        ptr = ptr->next;
+        currBlock->size = (size_t)((void*)currBlock->next - (void*)currBlock - BLOCK_SIZE);
+    }
+    else
+    {
+        currBlock->size = (size_t)((void*)MemoryBlock + MEMORY_SIZE - (void*)currBlock - BLOCK_SIZE);
     }
 }
 
@@ -98,16 +98,16 @@ void cleanFragments()
     MyBlock* ptr = (MyBlock*)MemoryBlock;
     MyBlock* start = NULL;
     MyBlock* end = NULL;
-    while (ptr != NULL)
+    while (ptr != NULL && ptr <= (MyBlock*)((void*)MemoryBlock + MEMORY_SIZE - BLOCK_SIZE))
     {
         if (ptr->free)
         {
             if (start == NULL) start = ptr;
             else end = ptr;
         }
-        else
+        else // Not free starting from here
         {
-            if (start != NULL && end != NULL)
+            if (start != NULL && end != NULL) // end is NULL means start is an isolated free block, no action needed
             {
                 start->size = (size_t)((void*)ptr - (void*)start - BLOCK_SIZE);
                 start->next = ptr;
@@ -126,35 +126,25 @@ void cleanFragments()
 
 void myfree(void *p, const char *file, int line)
 {
-
-    MyBlock *mem = (MyBlock *)p;
-
-    /*  printf("%d\n", mem->free); */
-
-    if (MemoryBlock == NULL)
-    {
-        fprintf(stderr, "Nothing in the main memory %s %d\n", file, line);
-    }
-
-    if (mem->free == 1)
-    {
-        fprintf(stderr, "Memory is already freed %s %d\n", file, line);
-    }
-
+    if (DEBUG) printf("    free(%p)\n", p);
     void *start = (void *)MemoryBlock;
     void *end = (void *)(MemoryBlock + MEMORY_SIZE);
 
+    MyBlock *mem = (MyBlock *)p;
+
     // Checks if p is within range of the MemoryBlock
-    if (p > start || p <= end)
-    {
-        mem->free = 0; 
-        --mem;
-        deleteBlock(mem);
-        /* printf("freed\n"); */
-        cleanFragments();
-    }
-    else if (p < start || p > end)
+    if (p < start || p > end)
     {
         fprintf(stderr, "This pointer does not exist in memory %s %d\n", file, line);
+        return;
     }
+
+    if (mem->free != 0)
+    {
+        fprintf(stderr, "Memory is already freed %s %d\n", file, line);
+        return;
+    }
+
+    deleteBlock(mem);
+    cleanFragments();
 }
