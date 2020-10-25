@@ -13,7 +13,7 @@ void clean()
 
 int ptrIsInMem(void* ptr)
 {
-    return ptr >= (void*)MemoryBlock && ptr <= (void*)(MemoryBlock + MEMORY_SIZE - BLOCK_SIZE);
+    return ptr >= (void*)MemoryBlock && ptr <= (void*)MemoryBlock + MEMORY_SIZE - BLOCK_SIZE;
 }
 
 // Returns a free block with enough size, or the last block
@@ -36,15 +36,16 @@ void fitNextBlock(MyBlock *ptr, size_t size)
     ptr->free = 0;
     if (ptr->next == NULL && ptrIsInMem((void*)ptr + size + BLOCK_SIZE))
     { // If this is the last free block
-        MyBlock *newNode = (void*)((void*)ptr + size + BLOCK_SIZE);
+        MyBlock *newNode = (void*)ptr + size + BLOCK_SIZE;
         newNode->size = (size_t)((void*)MemoryBlock + MEMORY_SIZE - (void*)newNode - BLOCK_SIZE);
+        newNode->next = NULL;
         newNode->free = 1;
         ptr->next = newNode;
     }
-    else if (ptr->next != NULL && (void*)ptr + size + BLOCK_SIZE*2 <= (void*)ptr->next)
+    else if (ptr->next != NULL && (void*)ptr + size + BLOCK_SIZE*2 <= (void*)(ptr->next))
     { // If there's at least space for metadata in between
-        MyBlock *newNode = (void*)((void*)ptr + size + BLOCK_SIZE);
-        newNode->size = (void*)ptr->next - (void*)ptr - size - BLOCK_SIZE*2;
+        MyBlock *newNode = (void*)ptr + size + BLOCK_SIZE;
+        newNode->size = (void*)(ptr->next) - (void*)ptr - size - BLOCK_SIZE*2;
         newNode->free = 1;
         newNode->next = ptr->next;
         ptr->next = newNode;
@@ -92,7 +93,7 @@ void deleteBlock(MyBlock *currBlock)
     currBlock->free = 1;
     if (currBlock->next != NULL)
     {
-        currBlock->size = (size_t)((void*)currBlock->next - (void*)currBlock - BLOCK_SIZE);
+        currBlock->size = (size_t)((void*)(currBlock->next) - (void*)currBlock - BLOCK_SIZE);
     }
     else
     {
@@ -103,6 +104,7 @@ void deleteBlock(MyBlock *currBlock)
 void cleanFragments()
 {
     MyBlock* ptr = (MyBlock*)MemoryBlock;
+    MyBlock* prev = NULL;
     MyBlock* start = NULL;
     MyBlock* end = NULL;
     while (ptrIsInMem(ptr))
@@ -110,7 +112,11 @@ void cleanFragments()
         if (ptr->free)
         {
             if (start == NULL) start = ptr;
-            else end = ptr;
+            else
+            {
+                end = ptr;
+                prev->next = NULL;
+            }
         }
         else // Not free starting from here
         {
@@ -122,6 +128,7 @@ void cleanFragments()
             start = NULL;
             end = NULL;
         }
+        prev = ptr;
         ptr = ptr->next;
     }
     if (start != NULL && end != NULL)
@@ -134,8 +141,6 @@ void cleanFragments()
 void myfree(void *p, const char *file, int line)
 {
     if (DEBUG) printf("\tfree(%p)\n", p);
-    void *start = (void *)MemoryBlock;
-    void *end = (void *)(MemoryBlock + MEMORY_SIZE);
 
     MyBlock *mem = (MyBlock *)p;
 

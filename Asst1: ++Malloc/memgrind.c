@@ -91,21 +91,6 @@ struct timeval testC()
 struct timeval testD()
 {
     clean();
-    struct timeval start_t;
-    struct timeval end_t;
-    struct timeval res_t;
-    gettimeofday(&start_t, NULL);
-
-    // Implement test D here
-
-    gettimeofday(&end_t, NULL);
-    timersub(&end_t, &start_t, &res_t);
-    return res_t;
-}
-
-struct timeval testE()
-{
-    clean();
     void* p[120];
     int malloc_count = 0, free_count = 0;
     int doMalloc[240], mallocSize[120];
@@ -140,6 +125,21 @@ struct timeval testE()
     return res_t;
 }
 
+struct timeval testE()
+{
+    clean();
+    struct timeval start_t;
+    struct timeval end_t;
+    struct timeval res_t;
+    gettimeofday(&start_t, NULL);
+
+    // Implement test D here
+
+    gettimeofday(&end_t, NULL);
+    timersub(&end_t, &start_t, &res_t);
+    return res_t;
+}
+
 float avgTime(struct timeval* times) {
     float result = 0;
     for (int i = 0; i < REPEAT; i++) {
@@ -150,27 +150,27 @@ float avgTime(struct timeval* times) {
 }
 
 int main() {
-/*    struct timeval resultA[REPEAT];
+    struct timeval resultA[REPEAT];
     struct timeval resultB[REPEAT];
     struct timeval resultC[REPEAT];
     struct timeval resultD[REPEAT];
     struct timeval resultE[REPEAT];
     for (int i = 0; i < REPEAT; i++) {
         if (DEBUG) printf("round %d\n", i);
-//        resultA[i] = testA();
-//        resultB[i] = testB();
-//        resultC[i] = testC();
-//        resultD[i] = testD();
-        resultE[i] = testE();
+        resultA[i] = testA();
+        resultB[i] = testB();
+        resultC[i] = testC();
+        resultD[i] = testD();
+//        resultE[i] = testE();
     }
-//    printf("Mean time for workload A: %.3fms\n", avgTime(resultA));
-//    printf("Mean time for workload B: %.3fms\n", avgTime(resultB));
-//    printf("Mean time for workload C: %.3fms\n", avgTime(resultC));
-//    printf("Mean time for workload D: %.3fms\n", avgTime(resultD));
-    printf("Mean time for workload E: %.3fms\n", avgTime(resultE));
-    return 0;*/
+    printf("Mean time for workload A: %.3fms\n", avgTime(resultA));
+    printf("Mean time for workload B: %.3fms\n", avgTime(resultB));
+    printf("Mean time for workload C: %.3fms\n", avgTime(resultC));
+    printf("Mean time for workload D: %.3fms\n", avgTime(resultD));
+//    printf("Mean time for workload E: %.3fms\n", avgTime(resultE));
+    return 0;
 
-    void* m[30];
+/*    void* m[30];
     m[0] = malloc(491);
     free(m[0]);
     m[1] = malloc(828);
@@ -220,5 +220,5 @@ int main() {
     m[25] = malloc(210);
     m[26] = malloc(864);
     m[27] = malloc(159);
-    m[28] = malloc(781);
+    m[28] = malloc(781);*/
 }
