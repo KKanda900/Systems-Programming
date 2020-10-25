@@ -150,6 +150,11 @@ void deleteBlock(MyBlock *currBlock)
     }
 }
 
+/*
+ * The cleanFragments function is used in myfree anytime after a valid pointer is freed. It will coalesce
+ * adjacent free blocks and find the correct size for the coalesced free block.
+ */
+
 void cleanFragments()
 {
     MyBlock* ptr = (MyBlock*)MemoryBlock;
