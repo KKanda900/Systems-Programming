@@ -7,11 +7,16 @@ typedef struct MetaData
 
 void *mymalloc(size_t size, const char *file, int line);
 void myfree(void *p, const char *file, int line);
+void clean();
 
+<<<<<<< HEAD
 #define DEBUG 1
 
 #define MEMORY_SIZE 4096
 #define BLOCK_SIZE sizeof(MyBlock)
+=======
+#define DEBUG 0
+>>>>>>> b96167152bc194316289db594a4c1789b05d087f
 
 #define malloc(size) mymalloc(size, __FILE__, __LINE__)
 #define free(p) myfree(p, __FILE__, __LINE__) 
