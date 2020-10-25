@@ -3,21 +3,16 @@
 
 static char MemoryBlock[MEMORY_SIZE]; //Memory Size is 4096
 
-MyBlock *front = (MyBlock *)MemoryBlock; // Returns the start of the Block
-
 // find the next available block
 MyBlock *next(MyBlock *block)
 {
     MyBlock *ptr = block;
 
-    while (ptr != NULL)
+    while (ptr->next != NULL)
     {
-
-        if (ptr->free == 0)
-        {
+        if(ptr->free != 0){
             break;
         }
-
         ptr = ptr->next;
     }
 
@@ -26,10 +21,10 @@ MyBlock *next(MyBlock *block)
 
 void fitNextBlock(MyBlock *ptr, size_t size)
 {
-    MyBlock *newNode = (MyBlock *)(MemoryBlock + size + BLOCK_SIZE);
-    newNode->size = (ptr->size) - size - BLOCK_SIZE;
+    MyBlock *newNode = (void *)((void*)ptr + size + BLOCK_SIZE);
+    newNode->size = ptr->size - size - BLOCK_SIZE;
     newNode->free = 1;
-    newNode->next = NULL;
+    newNode->next = ptr->next;
     ptr->size = size;
     ptr->free = 0;
     ptr->next = newNode;
@@ -38,23 +33,20 @@ void fitNextBlock(MyBlock *ptr, size_t size)
 void *mymalloc(size_t size, const char *file, int line)
 {
 
-    if (size == 0)
-    {
-        fprintf(stderr, "cannot call malloc() without a request size %s, %d\n", file, line);
-        return NULL;
-    }
+    MyBlock *front = (MyBlock *)MemoryBlock;
 
     if (size > MEMORY_SIZE - BLOCK_SIZE)
     {
+        DEBUG;
         fprintf(stderr, "requested size for allocation is too large %s, %d\n", file, line);
         return NULL;
     }
 
-    void *returnPTR;
+    // front won't be null so check if the size of the front is allocated or not 
 
-    // front is null so we are going to set the metadata chunk
-    if (front == NULL)
+    if (front->size == 0)
     {
+        DEBUG;
         front->size = MEMORY_SIZE - BLOCK_SIZE;
         front->free = 1;
         front->next = NULL;
@@ -63,36 +55,38 @@ void *mymalloc(size_t size, const char *file, int line)
     // Let's find the next node to fill
     MyBlock *ptr = front;
     ptr = next(ptr);
-
-    if (size > MEMORY_SIZE + BLOCK_SIZE)
+    
+    void *returnPTR;
+    
+    if (ptr->size > size + BLOCK_SIZE)
     {
-        fprintf(stderr, "Memory size too large %s %d\n", file, line);
-        return NULL;
-    }
-    else if (size <= MEMORY_SIZE + BLOCK_SIZE)
-    {
+        DEBUG;
         fitNextBlock(ptr, size);
-        returnPTR = (void *)ptr++;
+        returnPTR = ptr++;
+        return returnPTR;
+    } 
+    else if (ptr->size == size + BLOCK_SIZE)
+    {
+        DEBUG;
+        ptr->free = 1;
+        returnPTR = ptr++;
         return returnPTR;
     }
     else
     {
+        DEBUG;
         fprintf(stderr, "No More Space %s %d\n", file, line);
-        returnPTR = NULL;
-        return returnPTR;
+        return NULL;
     }
-
-    fprintf(stderr, "Allocated %s %d\n", file, line);
-    return returnPTR;
 }
 
 void deleteBlock(MyBlock *currBlock)
 {
     MyBlock *ptr = (MyBlock *)MemoryBlock;
-    MyBlock *prev;
-    while (ptr != NULL)
+    MyBlock *prev = NULL;
+    while (ptr->next != NULL)
     {
-        if (ptr->free == 0 && ptr->next->free == 0)
+        if (ptr->free == 1 && ptr->next->free == 1)
         {
             ptr->size += (ptr->next->size + BLOCK_SIZE);
             ptr->next = ptr->next->next;
@@ -105,7 +99,19 @@ void deleteBlock(MyBlock *currBlock)
 void myfree(void *p, const char *file, int line)
 {
 
-    MyBlock*mem = (MyBlock*)p;
+    MyBlock *mem = (MyBlock *)p;
+
+    /*  printf("%d\n", mem->free); */
+
+    if (MemoryBlock == NULL)
+    {
+        fprintf(stderr, "Nothing in the main memory %s %d\n", file, line);
+    }
+
+    if (mem->free == 1)
+    {
+        fprintf(stderr, "Memory is already freed %s %d\n", file, line);
+    }
 
     void *start = (void *)MemoryBlock;
     void *end = (void *)(MemoryBlock + MEMORY_SIZE);
@@ -113,12 +119,12 @@ void myfree(void *p, const char *file, int line)
     // Checks if p is within range of the MemoryBlock
     if (p > start || p <= end)
     {
-        mem->free = 0;
-        mem--;
+        mem->free = 0; 
+        --mem;
         deleteBlock(mem);
-        printf("freed\n");
+        /* printf("freed\n"); */
     }
-    else if(p < start || p > end) 
+    else if (p < start || p > end)
     {
         fprintf(stderr, "This pointer does not exist in memory %s %d\n", file, line);
     }

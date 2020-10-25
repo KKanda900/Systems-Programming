@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = 
+CFLAGS = -fsanitize=address
 
 memgrind: memgrind.o mymalloc.o 
 	$(CC) $(CFLAGS) memgrind.o mymalloc.o -o memgrind
