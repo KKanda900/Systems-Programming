@@ -1,13 +1,7 @@
-<<<<<<< HEAD
 D: 240 times, randomly choose between a random 0 - 1023 byte malloc() or free()ing one of the malloc()ed pointers (including null pointers due to not enough space)
     - This is an upgrade version of test C. We are including this workload because it can simulate the real situation of using malloc and free, in which the order of malloc and free is random, and the size of malloc is unpredictable. With this workload, we were able to find the rarest situations that can crash our code.
 
 E: 120 times, randomly choose between malloc() with decreasing size (120, 118, ..., 2) or free()ing one of the malloc()ed pointers. After the MemoryBlock is emptied, malloc() 45 bytes 60 times, then free() all the malloc()ed pointers.
     - We are including this workload to check if the MemoryBlock is really cleaned after free()ing all malloc()ed pointers. After an unpredictable use of the MemoryBlock, we try to fill it up with blocks of 24 bytes metadata and 45 bytes requested memory space. If the MemoryBlock is cleaned, 59 blocks should be allocated and the 60th malloc() should report not enough space.
-=======
-D: 240 times, randomly choose between a random 0 - 1023 byte malloc() or free()ing one of the malloc()ed pointers (including null pointers due to not enough space)
-    - This is an upgrade version of test C. We are including this workload because it can simulate the real situation of using malloc and free, in which the order of malloc and free is random, and the size of malloc is unpredictable. With this workload, we were able to find the rarest situations that can crash our code.
 
-E: 120 times, randomly choose between malloc() with decreasing size (120, 118, ..., 2) or free()ing one of the malloc()ed pointers. After the MemoryBlock is emptied, malloc() 45 bytes 60 times, then free() all the malloc()ed pointers.
-    - We are including this workload to check if the MemoryBlock is really cleaned after free()ing all malloc()ed pointers. After an unpredictable use of the MemoryBlock, we try to fill it up with blocks of 24 bytes metadata and 45 bytes requested memory space. If the MemoryBlock is cleaned, 59 blocks should be allocated and the 60th malloc() should report not enough space.
->>>>>>> 90dbcb8fb014d7a1628ab74719fb100cbe08cadf
+
