@@ -4,7 +4,7 @@
 #include <sys/time.h>
 #include "mymalloc.h"
 
-#define REPEAT 50
+#define REPEAT 100
 
 struct timeval testA()
 {
@@ -195,62 +195,13 @@ int main() {
         resultD[i] = testD();
         resultE[i] = testE();
     }
-    printf("Mean time for workload A: %.3fms\n", avgTime(resultA));
-    printf("Mean time for workload B: %.3fms\n", avgTime(resultB));
-    printf("Mean time for workload C: %.3fms\n", avgTime(resultC));
-    printf("Mean time for workload D: %.3fms\n", avgTime(resultD));
-    printf("Mean time for workload E: %.3fms\n", avgTime(resultE));
+    printf("\n");
+    printf("------------------------------------\n");
+    printf("| Mean time for workload A: %.3fms |\n", avgTime(resultA));
+    printf("| Mean time for workload B: %.3fms |\n", avgTime(resultB));
+    printf("| Mean time for workload C: %.3fms |\n", avgTime(resultC));
+    printf("| Mean time for workload D: %.3fms |\n", avgTime(resultD));
+    printf("| Mean time for workload E: %.3fms |\n", avgTime(resultE));
+    printf("------------------------------------\n");
     return 0;
-
-/*    void* m[30];
-    m[0] = malloc(491);
-    free(m[0]);
-    m[1] = malloc(828);
-    free(m[1]);
-    m[2] = malloc(955);
-    m[3] = malloc(306);
-    m[4] = malloc(260);
-    free(m[2]);
-    free(m[3]);
-    free(m[4]);
-    m[5] = malloc(399);
-    m[6] = malloc(1023);
-    free(m[5]);
-    m[7] = malloc(20);
-    free(m[6]);
-    free(m[7]);
-    m[8] = malloc(774);
-    free(m[8]);
-    m[9] = malloc(284);
-    free(m[9]);
-    m[10] = malloc(439);
-    m[11] = malloc(237);
-    free(m[10]);
-    m[12] = malloc(746);
-    m[13] = malloc(935);
-    free(m[11]);
-    free(m[12]);
-    m[14] = malloc(734);
-    m[15] = malloc(84);
-    free(m[13]);
-    free(m[14]);
-    m[16] = malloc(389);
-    free(m[15]);
-    m[17] = malloc(410);
-    m[18] = malloc(60);
-    free(m[16]);
-    m[19] = malloc(960);
-    free(m[17]);
-    free(m[18]);
-    m[20] = malloc(122);
-    free(m[19]);
-    free(m[20]);
-    m[21] = malloc(477);
-    m[22] = malloc(692);
-    m[23] = malloc(289);
-    m[24] = malloc(443);
-    m[25] = malloc(210);
-    m[26] = malloc(864);
-    m[27] = malloc(159);
-    m[28] = malloc(781);*/
 }
