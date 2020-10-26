@@ -204,4 +204,8 @@ int main() {
     printf("| Mean time for workload E: %.3fms |\n", avgTime(resultE));
     printf("------------------------------------\n");
     return 0;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 90dbcb8fb014d7a1628ab74719fb100cbe08cadf
