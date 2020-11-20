@@ -136,6 +136,21 @@ void *mymalloc(size_t size, const char *file, int line)
 }
 
 /*
+ * The findInMem function checks if the pointer provided is allocated by malloc()
+ * */
+
+int findInMem(void* p)
+{
+    MyBlock* ptr = (MyBlock*)MemoryBlock;
+    while (ptrIsInMem(ptr))
+    {
+        if (ptr == p) return 1;
+        ptr = ptr->next;
+    }
+    return 0;
+}
+
+/*
  * The deleteBlock function is used in myfree function to delete a block from the MemoryBlock. 
  * 
  * The deleteBlock function takes the current block and first makes it free and checks the condition if the next metadata
@@ -215,7 +230,7 @@ void myfree(void *p, const char *file, int line)
     MyBlock *mem = (MyBlock *)p;
 
     // Checks if p is within range of the MemoryBlock
-    if (!ptrIsInMem(mem))
+    if (!findInMem(mem))
     {
         fprintf(stderr, "%s:%d: Error: This pointer does not exist in memory\n", file, line);
         return;

@@ -4,7 +4,7 @@
 #include <sys/time.h>
 #include "mymalloc.h"
 
-#define REPEAT 100
+#define REPEAT 50
 
 struct timeval testA()
 {
@@ -16,9 +16,11 @@ struct timeval testA()
 
     for (int i = 0; i < 120; i++)
     {
-        if (DEBUG) printf("%d", i);
-        void* p = malloc(1);
-        if (DEBUG) printf("%d", i);
+        if (DEBUG)
+            printf("%d", i);
+        void *p = malloc(1);
+        if (DEBUG)
+            printf("%d", i);
         free(p);
     }
 
@@ -30,7 +32,7 @@ struct timeval testA()
 struct timeval testB()
 {
     clean();
-    void* p[120];
+    void *p[120];
 
     struct timeval start_t;
     struct timeval end_t;
@@ -39,12 +41,14 @@ struct timeval testB()
 
     for (int i = 0; i < 120; i++)
     {
-        if (DEBUG) printf("%d", i);
+        if (DEBUG)
+            printf("%d", i);
         p[i] = malloc(1);
     }
     for (int i = 0; i < 120; i++)
     {
-        if (DEBUG) printf("%d", i);
+        if (DEBUG)
+            printf("%d", i);
         free(p[i]);
     }
 
@@ -56,11 +60,12 @@ struct timeval testB()
 struct timeval testC()
 {
     clean();
-    void* p[120];
+    void *p[120];
     int malloc_count = 0, free_count = 0;
     int doMalloc[240];
     srand((unsigned)time(0));
-    for (int i = 0; i < 240; i++) doMalloc[i] = rand() % 2;
+    for (int i = 0; i < 240; i++)
+        doMalloc[i] = rand() % 2;
 
     struct timeval start_t;
     struct timeval end_t;
@@ -71,13 +76,15 @@ struct timeval testC()
     {
         if (malloc_count <= free_count || (doMalloc[i] && malloc_count < 120))
         {
-            if (DEBUG) printf("%d", malloc_count);
+            if (DEBUG)
+                printf("%d", malloc_count);
             p[malloc_count] = malloc(1);
             malloc_count++;
         }
         else
         {
-            if (DEBUG) printf("%d", free_count);
+            if (DEBUG)
+                printf("%d", free_count);
             free(p[free_count]);
             free_count++;
         }
@@ -91,13 +98,15 @@ struct timeval testC()
 struct timeval testD()
 {
     clean();
-    void* p[120];
+    void *p[120];
     int malloc_count = 0, free_count = 0;
     int doMalloc[240], mallocSize[120];
     srand((unsigned)time(0));
-    for (int i = 0; i < 240; i++) doMalloc[i] = rand() % 2;
+    for (int i = 0; i < 240; i++)
+        doMalloc[i] = rand() % 2;
     srand((unsigned)time(0));
-    for (int i = 0; i < 120; i++) mallocSize[i] = rand() % 1024;
+    for (int i = 0; i < 120; i++)
+        mallocSize[i] = rand() % 1024;
 
     struct timeval start_t;
     struct timeval end_t;
@@ -108,13 +117,15 @@ struct timeval testD()
     {
         if (malloc_count <= free_count || (doMalloc[i] && malloc_count < 120))
         {
-            if (DEBUG) printf("%d", malloc_count);
+            if (DEBUG)
+                printf("%d", malloc_count);
             p[malloc_count] = malloc(mallocSize[malloc_count]);
             malloc_count++;
         }
         else
         {
-            if (DEBUG) printf("%d", free_count);
+            if (DEBUG)
+                printf("%d", free_count);
             free(p[free_count]);
             free_count++;
         }
@@ -128,12 +139,13 @@ struct timeval testD()
 struct timeval testE()
 {
     clean();
-    void* p1[60];
-    void* p2[60];
+    void *p1[60];
+    void *p2[60];
     int malloc_count1 = 0, free_count1 = 0;
     int doMalloc[120];
     srand((unsigned)time(0));
-    for (int i = 0; i < 120; i++) doMalloc[i] = rand() % 2;
+    for (int i = 0; i < 120; i++)
+        doMalloc[i] = rand() % 2;
 
     struct timeval start_t;
     struct timeval end_t;
@@ -144,13 +156,15 @@ struct timeval testE()
     {
         if (malloc_count1 <= free_count1 || (doMalloc[i] && malloc_count1 < 60))
         {
-            if (DEBUG) printf("%d", malloc_count1);
-            p1[malloc_count1] = malloc(120 - malloc_count1*2);
+            if (DEBUG)
+                printf("%d", malloc_count1);
+            p1[malloc_count1] = malloc(120 - malloc_count1 * 2);
             malloc_count1++;
         }
         else
         {
-            if (DEBUG) printf("%d", free_count1);
+            if (DEBUG)
+                printf("%d", free_count1);
             free(p1[free_count1]);
             free_count1++;
         }
@@ -158,12 +172,14 @@ struct timeval testE()
 
     for (int i = 0; i < 60; i++)
     {
-        if (DEBUG) printf("%d", i);
+        if (DEBUG)
+            printf("%d", i);
         p2[i] = malloc(45);
     }
     for (int i = 0; i < 60; i++)
     {
-        if (DEBUG) printf("%d", i);
+        if (DEBUG)
+            printf("%d", i);
         free(p2[i]);
     }
 
@@ -172,16 +188,19 @@ struct timeval testE()
     return res_t;
 }
 
-float avgTime(struct timeval* times) {
+float avgTime(struct timeval *times)
+{
     float result = 0;
-    for (int i = 0; i < REPEAT; i++) {
-        result += (float)times[i].tv_sec*(float)1000;
-        result += (float)times[i].tv_usec/(float)1000;
+    for (int i = 0; i < REPEAT; i++)
+    {
+        result += (float)times[i].tv_sec * (float)1000;
+        result += (float)times[i].tv_usec / (float)1000;
     }
-    return result/(float)REPEAT;
+    return result / (float)REPEAT;
 }
 
-int main() {
+int main()
+{
     struct timeval resultA[REPEAT];
     struct timeval resultB[REPEAT];
     struct timeval resultC[REPEAT];
