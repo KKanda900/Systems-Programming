@@ -18,11 +18,11 @@ typedef struct words
     struct words *next;
 } Words;
 
-Words *addWord(char word[], Words *wf)
+Words *addWord(char word[], Words *wf, struct dirent *dp)
 {
     Words *newWF = malloc(sizeof(Words));
     strcpy(newWF->word, word);
-    newWF->freq = freqCount(newWF->word);
+    newWF->freq = freqCount(newWF->word, dp->d_name);
     //printf("%s | %d\n", newWF->word, newWF->freq);
     newWF->next = NULL;
 
@@ -37,9 +37,9 @@ Words *addWord(char word[], Words *wf)
     return wf;
 }
 
-int freqCount(char word1[], int word_count)
+int freqCount(char word1[], char *filepath)
 {
-    FILE *fp = fopen("example.txt", "r");
+    FILE *fp = fopen(filepath, "r");
     char word[50];
     int counter = 0;
 
@@ -94,6 +94,7 @@ int main()
 {
     DIR *direct = opendir(".");
     struct dirent *dp;
+    struct stat sb;
 
     while ((dp = readdir(direct)))
     {
@@ -103,12 +104,16 @@ int main()
         }
         else
         {
-            if (dp->d_type == DT_REG)
+            if (stat(dp->d_name, &sb) != -1)
             {
-                int fd = open(dp->d_name, O_RDONLY);
-                int size = lseek(fd, 0, SEEK_END);
-                if (strcmp(get_filename_ext(dp->d_name), "txt") == 0)
+                if (sb.st_mode & S_IXUSR) // binary files
                 {
+                    //skip
+                }
+                else
+                {
+                    int fd = open(dp->d_name, O_RDONLY);
+                    int size = lseek(fd, 0, SEEK_END);
                     FILE *fp = fopen(dp->d_name, "r");
                     char word[50];
                     Words *wf = malloc(sizeof(Words));
@@ -116,7 +121,7 @@ int main()
 
                     while (fscanf(fp, "%s", word) != EOF)
                     {
-                        wf = addWord(word, wf);
+                        wf = addWord(word, wf, dp);
                     }
 
                     fclose(fp);
@@ -124,12 +129,11 @@ int main()
                     printList(wf);
 
                     free_list(wf);
+                    close(fd);
                 }
-                close(fd);
             }
         }
     }
-
     closedir(direct);
 
     return 0;
