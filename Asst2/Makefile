@@ -1,7 +1,6 @@
-all: wordFreq directory
+all: wordFreq 
 
 wordFreq: wordFreq.c
-	gcc -o wordFreq wordFreq.c
+	gcc -o wordFreq -fsanitize=address wordFreq.c
 
-directory: direct.c
-	gcc -o direct direct.c
+

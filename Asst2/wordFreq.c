@@ -111,24 +111,28 @@ int main()
                     //skip
                 }
                 else
-                {
+                { 
                     int fd = open(dp->d_name, O_RDONLY);
                     int size = lseek(fd, 0, SEEK_END);
                     FILE *fp = fopen(dp->d_name, "r");
-                    char word[50];
+                    char word[1024];
                     Words *wf = malloc(sizeof(Words));
-                    int word_count = 0;
+                    //int word_count = 0;
 
-                    while (fscanf(fp, "%s", word) != EOF)
+                    char*tokens;
+
+                    while (fgets(word, 1024, fp) != NULL)
                     {
-                        wf = addWord(word, wf, dp);
+                        tokens = strtok(word, ".!,?;:-_[]{}'""''* ");
+                        while(tokens != NULL){
+                            wf = addWord(tokens, wf, dp);
+                            printf("%s\n", tokens); 
+                            tokens = strtok(NULL, ".!,?;:-_[]{}'""''*   <>#");
+                        }
                     }
 
-                    fclose(fp);
-
                     printList(wf);
-
-                    free_list(wf);
+                    free_list(wf); 
                     close(fd);
                 }
             }
