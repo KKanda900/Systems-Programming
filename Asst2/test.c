@@ -62,6 +62,7 @@ void free_list(thread_list *front)
 
 void *file_handling(void *f_path)
 {
+    printf("Filepath: %s\n", (char*)f_path);
     return NULL;
 }
 
@@ -86,7 +87,7 @@ void *directory_handling(void *d_path)
             strcat(localname, dp->d_name);
             if (dp->d_type == DT_DIR)
             {
-                printf("%s\n", localname);
+                printf("Directory Path: %s\n", localname);
                 pthread_t ptid;
                 addNode(front, ptid);
                 pthread_create(&front->data, NULL, &directory_handling, (void *)localname);
@@ -94,7 +95,7 @@ void *directory_handling(void *d_path)
             else if (dp->d_type == DT_REG)
             {
 
-                printf("%s\n", localname);
+                printf("Filepath: %s\n", localname);
                 pthread_t ptid;
                 addNode(front, ptid);
                 pthread_create(&front->data, NULL, &file_handling, (void *)localname);
