@@ -20,6 +20,14 @@ typedef struct Files
     struct Files* next;
 } Files;
 
+void filesToString (Files* f);
+void tokensToString (Tokens* t);
+
+void tokenizer (FILE* f, char* filename, Files* ptr);
+char* getBuff (char* oldBuff, int count);
+char* getToken (FILE* f);
+void insertToken (Tokens* ptr, char* word);
+
 // Print out the token list
 void tokensToString (Tokens* t)
 {
@@ -52,7 +60,7 @@ char* getBuff (char* oldBuff, int count)
 }
 
 // omit non alpha/hyphen char and turn alpha into lower case
-char* cleanToken (FILE* f)
+char* getToken (FILE* f)
 {
     int validCount = 0;
     int buffCount = 1;
@@ -121,8 +129,9 @@ void insertToken (Tokens* ptr, char* word)
     curr->next = ptr;
 }
 
-// Take a opened FILE and a pointer pointing to any node of the shared file list, construct tokens for the given file
-void tokenizer (FILE* f, Files* ptr)
+// Take a opened FILE and a pointer pointing to any node of the shared file list, construct tokens for the given file.
+// Also save the filename for later use
+void tokenizer (FILE* f, char* filename, Files* ptr)
 {
     // lock
     while (ptr != NULL) // find the end of list
@@ -131,15 +140,18 @@ void tokenizer (FILE* f, Files* ptr)
     }
     ptr = (Files*) malloc(sizeof(Files));
     ptr->tokens = NULL;
+    ptr->fileName = malloc(strlen(filename) + 1);
+    strcpy(ptr->fileName, filename);
     ptr->tokenCount = 0;
     ptr->next = NULL;
     // unlock
 
-    char* cleanedToken = cleanToken(f);
+    char* cleanedToken = getToken(f);
     while (cleanedToken != NULL)
     {
+        ptr->tokenCount++;
         insertToken(ptr->tokens, cleanedToken);
-        cleanedToken = cleanToken(f);
+        cleanedToken = getToken(f);
     }
 }
 
