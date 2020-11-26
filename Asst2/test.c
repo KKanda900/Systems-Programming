@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 {
     if (argc != 2)
     {
-        printf("Expecting two arguments");
+        printf("Expecting two arguments\n");
         return -1;
     }
 
