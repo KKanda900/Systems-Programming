@@ -51,12 +51,18 @@ void free_list(thread_list *front)
     {
         // This would be like any traversal but we are freeing each memory of the pointers
         thread_list *tmp = ptr->next;
+        pthread_join(front->data, NULL);
         free(ptr); // like here
         ptr = tmp;
     }
 
     // then we free the rest
     free(ptr);
+}
+
+void *file_handling(void *f_path)
+{
+    return NULL;
 }
 
 void *directory_handling(void *d_path)
@@ -67,8 +73,7 @@ void *directory_handling(void *d_path)
     struct dirent *dp;
     char localname[200000];
     thread_list *front = malloc(sizeof(thread_list));
-    thread_list *front2 = malloc(sizeof(thread_list));
-    void *handler;
+    /* void *handler; */
 
     if (dir != NULL)
     {
@@ -84,15 +89,15 @@ void *directory_handling(void *d_path)
                 printf("%s\n", localname);
                 pthread_t ptid;
                 addNode(front, ptid);
-                pthread_create(&ptid, NULL, &directory_handling, (void *)localname);
+                pthread_create(&front->data, NULL, &directory_handling, (void *)localname);
             }
             else if (dp->d_type == DT_REG)
             {
 
                 printf("%s\n", localname);
                 pthread_t ptid;
-                addNode(front2, ptid);
-                pthread_create(&ptid, NULL, &file_handling, (void *)localname);
+                addNode(front, ptid);
+                pthread_create(&front->data, NULL, &file_handling, (void *)localname);
             }
         }
     }
@@ -104,28 +109,11 @@ void *directory_handling(void *d_path)
 
     closedir(dir);
 
-    while (front != NULL)
-    {
-        pthread_join(front->data, &handler);
-        front = front->next;
-    }
-
-    while (front2 != NULL)
-    {
-        pthread_join(front2->data, &handler);
-        front2 = front2->next;
-    }
-
     free_list(front);
-    free_list(front2);
 
     return NULL;
 }
 
-void *file_handling(void *f_path)
-{
-    return NULL;
-}
 
 int main(int argc, char **argv)
 {
@@ -136,6 +124,8 @@ int main(int argc, char **argv)
     }
 
     directory_handling((void *)argv[1]);
+
+    pthread_exit(NULL);
 
     return 0;
 }
