@@ -1,6 +1,11 @@
-all: wordFreq 
+TARGET = test
+CC     = gcc
+CFLAGS = -pthread 
 
-wordFreq: wordFreq.c
-	gcc -o wordFreq -fsanitize=address wordFreq.c
+$(TARGET): $(TARGET).c
+	$(CC) $(CFLAGS) $^ -o $@
+
+clean:
+	rm -rf $(TARGET) *.o *.a *.dylib *.dSYM
 
 
