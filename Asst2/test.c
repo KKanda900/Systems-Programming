@@ -76,11 +76,11 @@ void *directory_handling(void *d_path)
         {
             if ((strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0))
                 continue;
+            strcpy(localname, d_path);
+            strcat(localname, "/");
+            strcat(localname, dp->d_name);
             if (dp->d_type == DT_DIR)
             {
-                strcpy(localname, d_path);
-                strcat(localname, "/");
-                strcat(localname, dp->d_name);
                 printf("%s\n", localname);
                 pthread_t ptid;
                 addNode(front, ptid);
@@ -88,9 +88,7 @@ void *directory_handling(void *d_path)
             }
             else if (dp->d_type == DT_REG)
             {
-                strcpy(localname, d_path);
-                strcat(localname, "/");
-                strcat(localname, dp->d_name);
+
                 printf("%s\n", localname);
                 pthread_t ptid;
                 addNode(front2, ptid);
