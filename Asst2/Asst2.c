@@ -125,18 +125,11 @@ void insertToken (Tokens* ptr, char* word)
 void tokenizer (FILE* f, Files* ptr)
 {
     // lock
-    if (ptr == NULL)
+    while (ptr != NULL) // find the end of list
     {
-        ptr = (Files*) malloc(sizeof(Files));
+        ptr = ptr->next;
     }
-    else
-    {
-        while (ptr != NULL) // find the end of list
-        {
-            ptr = ptr->next;
-        }
-        ptr = (Files*) malloc(sizeof(Files));
-    }
+    ptr = (Files*) malloc(sizeof(Files));
     ptr->tokens = NULL;
     ptr->tokenCount = 0;
     ptr->next = NULL;
