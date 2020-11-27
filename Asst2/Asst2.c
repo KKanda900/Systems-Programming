@@ -22,21 +22,23 @@ typedef struct Files
 
 void filesToString (Files* f);
 void tokensToString (Tokens* t);
+void freeFiles (Files* head);
+void freeTokens (Tokens* head);
 
 void tokenizer (FILE* f, char* filename, Files* ptr);
 char* getBuff (char* oldBuff, int count);
 char* getToken (FILE* f);
-void insertToken (Tokens* ptr, char* word);
+void insertToken (Files* f, char* word);
 
 // Print out the token list
 void tokensToString (Tokens* t)
 {
     while (t != NULL)
     {
-        printf("%s %d ->\n", t->word, t->freq);
+        printf("\t%s %d ->\n", t->word, t->freq);
         t = t->next;
     }
-    printf("end of list\n");
+    printf("\tend of list\n");
 }
 
 // Print out the file list
@@ -45,9 +47,33 @@ void filesToString (Files* f)
     while (f != NULL)
     {
         printf("%s %d ->\n", f->fileName, f->tokenCount);
+        tokensToString(f->tokens);
         f = f->next;
     }
     printf("end of list\n");
+}
+
+// Free all Files node from the given head.
+void freeFiles (Files* head)
+{
+    if (head == NULL) return;
+
+    freeTokens(head->tokens);
+    free(head->fileName);
+    Files* next = head->next;
+    free(head);
+    freeFiles(next);
+}
+
+// Free all Tokens node from the given head.
+void freeTokens (Tokens* head)
+{
+    if (head == NULL) return;
+
+    free(head->word);
+    Tokens* next = head->next;
+    free(head);
+    freeTokens(next);
 }
 
 // move string to a bigger buffer
@@ -65,6 +91,7 @@ char* getToken (FILE* f)
     int validCount = 0;
     int buffCount = 1;
     char* buff = malloc(1024);
+    buff[0] = '\0';
 
     int c = fgetc(f);
     char ch = '\0';
@@ -97,36 +124,52 @@ char* getToken (FILE* f)
 }
 
 // Insert the given token into the token list
-void insertToken (Tokens* ptr, char* word)
+void insertToken (Files* f, char* word)
 {
-    Tokens* prev = NULL;
-    while (ptr != NULL && strcmp(word, ptr->word) > 0)
+    Tokens* ptr = NULL;
+    if (f->tokens == NULL) // first token
     {
-        prev = ptr;
-        ptr = ptr->next;
-    }
-    if (ptr == NULL) // end of list or root is empty
-    {
-        ptr = (Tokens*) malloc(sizeof(Tokens));
-        ptr->word = malloc(strlen(word) + 1);
-        strcpy(ptr->word, word);
-        ptr->freq = 1;
+        f->tokens = (Tokens*) malloc(sizeof(Tokens));
+        ptr = f->tokens;
         ptr->next = NULL;
-        return;
     }
-
-    if (strcmp(word, ptr->word) == 0) // token existed
+    else
     {
-        ptr->freq++;
-        return;
+        Tokens* prev = NULL;
+        ptr = f->tokens;
+        while (ptr != NULL && strcmp(word, ptr->word) > 0)
+        {
+            prev = ptr;
+            ptr = ptr->next;
+        }
+        if (prev == NULL) // new front
+        {
+            f->tokens = (Tokens*) malloc(sizeof(Tokens));
+            f->tokens->next = ptr;
+            ptr = f->tokens;
+        }
+        else if (ptr == NULL) // end of list
+        {
+            prev->next = (Tokens*) malloc(sizeof(Tokens));
+            ptr = prev->next;
+            ptr->next = NULL;
+        }
+        else if (strcmp(word, ptr->word) == 0) // token existed
+        {
+            ptr->freq++;
+            return;
+        }
+        else // insert in the middle
+        {
+            prev->next = (Tokens*) malloc(sizeof(Tokens));
+            prev->next->next = ptr;
+            ptr = prev->next;
+        }
     }
 
-    Tokens* curr = (Tokens*) malloc(sizeof(Tokens));
-    curr->word = malloc(strlen(word) + 1);
-    strcpy(curr->word, word);
-    curr->freq = 1;
-    prev->next = curr;
-    curr->next = ptr;
+    ptr->word = malloc(strlen(word) + 1);
+    strcpy(ptr->word, word);
+    ptr->freq = 1;
 }
 
 // Take a opened FILE and a pointer pointing to any node of the shared file list, construct tokens for the given file.
@@ -134,29 +177,40 @@ void insertToken (Tokens* ptr, char* word)
 void tokenizer (FILE* f, char* filename, Files* ptr)
 {
     // lock
-    while (ptr != NULL) // find the end of list
+    if (ptr->fileName == NULL) // This is a new head of Files
     {
-        ptr = ptr->next;
+        ptr->fileName = malloc(strlen(filename) + 1);
+        strcpy(ptr->fileName, filename);
     }
-    ptr = (Files*) malloc(sizeof(Files));
-    ptr->tokens = NULL;
-    ptr->fileName = malloc(strlen(filename) + 1);
-    strcpy(ptr->fileName, filename);
-    ptr->tokenCount = 0;
-    ptr->next = NULL;
+    else
+    {
+        while (ptr->next != NULL) // find the end of list
+        {
+            ptr = ptr->next;
+        }
+        ptr->next = (Files *) malloc(sizeof(Files));
+        ptr = ptr->next;
+
+        ptr->tokens = NULL;
+        ptr->fileName = malloc(strlen(filename) + 1);
+        strcpy(ptr->fileName, filename);
+        ptr->tokenCount = 0;
+        ptr->next = NULL;
+    }
     // unlock
 
     char* cleanedToken = getToken(f);
-    while (cleanedToken != NULL)
+    while (strlen(cleanedToken) != 0)
     {
         ptr->tokenCount++;
-        insertToken(ptr->tokens, cleanedToken);
+        insertToken(ptr, cleanedToken);
         cleanedToken = getToken(f);
     }
+    // return ptr;
 }
 
 int main (int argc, char** argv) {
-    printf("%d\n", argc);
+/*    printf("%d\n", argc);
     if (argc < 2) {
         printf("Provide a directory.\n");
         return EXIT_SUCCESS;
@@ -164,6 +218,22 @@ int main (int argc, char** argv) {
 
     int dirnlen = (int)strlen(argv[1]);
     char* dir = (char*)malloc(dirnlen+1); //+1 for '\0'
-    strcpy(dir, argv[1]);
+    strcpy(dir, argv[1]);*/
 
+    Files* filesHead = (Files*) malloc(sizeof(Files));
+    filesHead->tokens = NULL;
+    filesHead->next = NULL;
+    filesHead->fileName = NULL;
+    filesHead->tokenCount = 0;
+
+    // scan through dir
+    // found somefile.txt
+    FILE* fp = fopen("somefile", "r");
+    tokenizer(fp, "dir/somefile", filesHead); // I can let this return the last files node to reduce time
+
+    filesToString(filesHead);
+
+    freeFiles(filesHead);
+
+    return EXIT_SUCCESS;
 }
