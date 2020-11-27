@@ -3,23 +3,23 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <errno.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <pthread.h>
 
 /*
  * Currently: Working on file handling
  */
 
-#define DEBUG printf("hello\n")
-
 typedef struct thread_list
 {
     unsigned long int data;
-    pthread_mutex_t mtx;
     struct thread_list *next;
 } thread_list;
+
+typedef struct thread_arg {
+    char* pathname; 
+    pthread_mutex_t * mutex_ptr;
+} thread_arg;
 
 thread_list *addNode(thread_list *front, unsigned long data)
 {
@@ -60,6 +60,7 @@ void free_list(thread_list *front)
         thread_list *tmp = ptr->next;
         pthread_join(front->data, NULL);
         free(ptr); // like here
+        //pthread_exit(NULL);
         ptr = tmp;
     }
 
@@ -67,33 +68,16 @@ void free_list(thread_list *front)
     free(ptr);
 }
 
-void *file_handling(void *f_path)
+void *file_handling(void *p)
 {
-    /* int fd = open((char *)f_path, O_RDONLY);
+    /* thread_arg * args = (thread_arg *) p;
 
-     if (DEBUG == 0)
-        printf("file handler\n"); 
+    pthread_mutex_lock(args->mutex_ptr); */
 
-    if (fd < 0)
-    {
-        //printf("file handler\n");
-        perror(f_path);
-        exit(1);
-    }
-
-    printf("filepath: %s\n", (char *)f_path); */
-
-    FILE *fp = fopen((char *)f_path, "r");
-
-    if (fp == NULL)
-    {
-        exit(1);
-    }
-
-    printf("filepath: %s\n", (char *)f_path);
-
-    fclose(fp);
-
+    int fd = open((char*)p, O_RDONLY);
+    printf("File: %s\n", (char*)p);
+    
+    /* pthread_mutex_unlock(args->mutex_ptr); */
     return NULL;
 }
 
@@ -103,48 +87,50 @@ void *directory_handling(void *d_path)
 
     DIR *dir = opendir(d_path);
     struct dirent *dp;
-    struct stat buff;
+    char localname[200000];
     thread_list *front = malloc(sizeof(thread_list));
-    /* void *handler; */
+    //pthread_mutex_t lock;
 
     if (dir != NULL)
     {
-        while ((dp = readdir(dir)) != NULL)
+        while ((dp = readdir(dir)) != 0)
         {
-            if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)
+            if ((strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0))
                 continue;
-            char localname[20000];
             strcpy(localname, d_path);
             strcat(localname, "/");
-            strcat(localname, dp->d_name);
-            if (stat(localname, &buff) == 0)
+            strcat(localname, dp->d_name); 
+            if (dp->d_type == DT_DIR)
             {
-                if (S_ISDIR(buff.st_mode) > 0)
-                {
-                    //pthread_t ptid;
-                    //addNode(front, ptid);
-                    //pthread_create(&front->data, NULL, &directory_handling, (void *)localname);
-                    printf("Directory name: %s\n", localname);
-                    directory_handling((void*)localname);
-                }
-                if (S_ISREG(buff.st_mode) > 0)
-                {
-                    //pthread_t ptid;
-                    //addNode(front, ptid);
-                    //pthread_create(&front->data, NULL, &file_handling, (void *)localname);
-                    file_handling((void*)localname);
-                }
-                else
-                {
-                    continue;
-                }
+                printf("Directory Path: %s\n", localname);
+                
+                /* directory_handling((void*)localname); */
+                
+                pthread_t ptid;
+                addNode(front, ptid);
+                pthread_create(&ptid, NULL, &directory_handling, (void*)localname);
+                
+            }
+            else if (dp->d_type == DT_REG)
+            {
+
+                /* file_handling((void*)localname); */
+
+                /* thread_arg t1;
+                t1.pathname = localname;
+                t1.mutex_ptr = &lock; */
+
+                pthread_t ptid;
+                addNode(front, ptid);
+                pthread_create(&ptid, NULL, &file_handling, (void*)localname);
+                
             }
         }
     }
-    else if (dir == NULL)
+    else 
     {
-        DEBUG;
         perror(d_path);
+        /* printf("Error\n"); */
         exit(1);
     }
 
@@ -154,6 +140,7 @@ void *directory_handling(void *d_path)
 
     return NULL;
 }
+
 
 int main(int argc, char **argv)
 {
@@ -165,7 +152,7 @@ int main(int argc, char **argv)
 
     directory_handling((void *)argv[1]);
 
-    pthread_exit(NULL);
+    /* pthread_exit(NULL); */
 
     return 0;
 }
