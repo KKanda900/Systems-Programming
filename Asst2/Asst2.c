@@ -209,6 +209,7 @@ void tokenizer (FILE* f, char* filename, Files* ptr)
         free(oldToken);
         cleanedToken = getToken(f);
     }
+    free(cleanedToken);
     // return ptr;
 }
 
@@ -231,14 +232,16 @@ int main (int argc, char** argv) {
 
     // scan through dir
     // found somefile.txt
-    FILE* fp = fopen("test0.txt", "r");
-    tokenizer(fp, "./test0.txt", filesHead); // I can let this return the last files node to reduce time
+    FILE* fp1 = fopen("test0.txt", "r");
+    tokenizer(fp1, "./test0.txt", filesHead); // I can let this return the last files node to reduce time
+    fclose(fp1);
+    FILE* fp2 = fopen("test1.txt", "r");
+    tokenizer(fp2, "./test1.txt", filesHead); // I can let this return the last files node to reduce time
+    fclose(fp2);
 
     filesToString(filesHead);
 
     freeFiles(filesHead);
-
-    fclose(fp);
 
     return EXIT_SUCCESS;
 }
