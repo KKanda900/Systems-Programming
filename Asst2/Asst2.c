@@ -120,6 +120,7 @@ char* getToken (FILE* f)
     }
     char* string = malloc(validCount + 1);
     strcpy(string, buff);
+    free(buff);
     return string;
 }
 
@@ -204,6 +205,8 @@ void tokenizer (FILE* f, char* filename, Files* ptr)
     {
         ptr->tokenCount++;
         insertToken(ptr, cleanedToken);
+        char* oldToken = cleanedToken;
+        free(oldToken);
         cleanedToken = getToken(f);
     }
     // return ptr;
@@ -228,12 +231,14 @@ int main (int argc, char** argv) {
 
     // scan through dir
     // found somefile.txt
-    FILE* fp = fopen("somefile", "r");
-    tokenizer(fp, "dir/somefile", filesHead); // I can let this return the last files node to reduce time
+    FILE* fp = fopen("test0.txt", "r");
+    tokenizer(fp, "./test0.txt", filesHead); // I can let this return the last files node to reduce time
 
     filesToString(filesHead);
 
     freeFiles(filesHead);
+
+    fclose(fp);
 
     return EXIT_SUCCESS;
 }
