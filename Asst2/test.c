@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <pthread.h>
 
 /*
  * Currently: Working on file handling
@@ -13,6 +15,11 @@ typedef struct thread_list
     unsigned long int data;
     struct thread_list *next;
 } thread_list;
+
+typedef struct thread_arg {
+    char* pathname; 
+    pthread_mutex_t * mutex_ptr;
+} thread_arg;
 
 thread_list *addNode(thread_list *front, unsigned long data)
 {
@@ -51,12 +58,27 @@ void free_list(thread_list *front)
     {
         // This would be like any traversal but we are freeing each memory of the pointers
         thread_list *tmp = ptr->next;
+        pthread_join(front->data, NULL);
         free(ptr); // like here
+        //pthread_exit(NULL);
         ptr = tmp;
     }
 
     // then we free the rest
     free(ptr);
+}
+
+void *file_handling(void *p)
+{
+    /* thread_arg * args = (thread_arg *) p;
+
+    pthread_mutex_lock(args->mutex_ptr); */
+
+    int fd = open((char*)p, O_RDONLY);
+    printf("File: %s\n", (char*)p);
+    
+    /* pthread_mutex_unlock(args->mutex_ptr); */
+    return NULL;
 }
 
 void *directory_handling(void *d_path)
@@ -67,8 +89,7 @@ void *directory_handling(void *d_path)
     struct dirent *dp;
     char localname[200000];
     thread_list *front = malloc(sizeof(thread_list));
-    thread_list *front2 = malloc(sizeof(thread_list));
-    void *handler;
+    //pthread_mutex_t lock;
 
     if (dir != NULL)
     {
@@ -78,64 +99,60 @@ void *directory_handling(void *d_path)
                 continue;
             strcpy(localname, d_path);
             strcat(localname, "/");
-            strcat(localname, dp->d_name);
+            strcat(localname, dp->d_name); 
             if (dp->d_type == DT_DIR)
             {
-                printf("%s\n", localname);
+                printf("Directory Path: %s\n", localname);
+                
+                /* directory_handling((void*)localname); */
+                
                 pthread_t ptid;
                 addNode(front, ptid);
-                pthread_create(&ptid, NULL, &directory_handling, (void *)localname);
+                pthread_create(&ptid, NULL, &directory_handling, (void*)localname);
+                
             }
             else if (dp->d_type == DT_REG)
             {
 
-                printf("%s\n", localname);
+                /* file_handling((void*)localname); */
+
+                /* thread_arg t1;
+                t1.pathname = localname;
+                t1.mutex_ptr = &lock; */
+
                 pthread_t ptid;
-                addNode(front2, ptid);
-                pthread_create(&ptid, NULL, &file_handling, (void *)localname);
+                addNode(front, ptid);
+                pthread_create(&ptid, NULL, &file_handling, (void*)localname);
+                
             }
         }
     }
-    else if (dir == NULL)
+    else 
     {
         perror(d_path);
+        /* printf("Error\n"); */
         exit(1);
     }
 
     closedir(dir);
 
-    while (front != NULL)
-    {
-        pthread_join(front->data, &handler);
-        front = front->next;
-    }
-
-    while (front2 != NULL)
-    {
-        pthread_join(front2->data, &handler);
-        front2 = front2->next;
-    }
-
     free_list(front);
-    free_list(front2);
 
     return NULL;
 }
 
-void *file_handling(void *f_path)
-{
-    return NULL;
-}
 
 int main(int argc, char **argv)
 {
     if (argc != 2)
     {
-        printf("Expecting two arguments");
+        printf("Expecting two arguments\n");
         return -1;
     }
 
     directory_handling((void *)argv[1]);
+
+    /* pthread_exit(NULL); */
 
     return 0;
 }
