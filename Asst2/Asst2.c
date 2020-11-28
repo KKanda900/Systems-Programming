@@ -2,12 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <pthread.h>
+#include <math.h>
 
 // Linked List for word tokens in a file.
 typedef struct Tokens
 {
     char* word;
-    int freq;
+    double freq;
     struct Tokens* next;
 } Tokens;
 
@@ -29,6 +31,13 @@ void tokenizer (FILE* f, char* filename, Files* ptr);
 char* getBuff (char* oldBuff, int count);
 char* getToken (FILE* f);
 void insertToken (Files* f, char* word);
+
+Files* mergesortFiles(Files* head);
+Files* mergeFiles(Files* left, Files* right);
+
+void getProb(Files* head);
+Tokens* computeMean(Files* f1, Files* f2);
+double computeKLD(Tokens* mean, Tokens* t);
 
 // Print out the token list
 void tokensToString (Tokens* t)
@@ -177,7 +186,7 @@ void insertToken (Files* f, char* word)
 // Also save the filename for later use
 void tokenizer (FILE* f, char* filename, Files* ptr)
 {
-    // lock
+    // move below out to directory handling
     if (ptr->fileName == NULL) // This is a new head of Files
     {
         ptr->fileName = malloc(strlen(filename) + 1);
@@ -198,7 +207,7 @@ void tokenizer (FILE* f, char* filename, Files* ptr)
         ptr->tokenCount = 0;
         ptr->next = NULL;
     }
-    // unlock
+    // move above out to directory handling
 
     char* cleanedToken = getToken(f);
     while (strlen(cleanedToken) != 0)
@@ -211,6 +220,169 @@ void tokenizer (FILE* f, char* filename, Files* ptr)
     }
     free(cleanedToken);
     // return ptr;
+}
+
+// Merge two sorted Files lists
+Files* mergeFiles(Files* left, Files* right) // both left & right are not NULL is ensured
+{
+    Files* sortedHead = NULL;
+    if (left->tokenCount > right->tokenCount)
+    {
+        sortedHead = right;
+        right = right->next;
+    }
+    else
+    {
+        sortedHead = left;
+        left = left->next;
+    }
+    Files* ptr = sortedHead;
+
+    while (left != NULL && right != NULL)
+    {
+        if (left->tokenCount > right->tokenCount)
+        {
+            ptr->next = right;
+            right = right->next;
+        }
+        else
+        {
+            ptr->next = left;
+            left = left->next;
+        }
+        ptr = ptr->next;
+    }
+    if (right == NULL)
+    {
+        ptr->next = left;
+    }
+    else
+    {
+        ptr->next = right;
+    }
+    return sortedHead;
+}
+
+// Sorting Files list with merge sort
+Files* mergesortFiles(Files* head)
+{
+    if (head == NULL || head->next == NULL)
+    {
+        return head;
+    }
+    Files* middle = head;
+    Files* end = head->next;
+    while (end != NULL)
+    {
+        end = end->next;
+        if (end != NULL)
+        {
+            end = end->next;
+            middle = middle->next;
+        }
+    }
+    Files* left = head;
+    Files* right = middle->next;
+    middle->next = NULL;
+    return mergeFiles(mergesortFiles(left), mergesortFiles(right));
+}
+
+// Turn frequency of tokens into prob
+void getProb(Files* head)
+{
+    while (head != NULL)
+    {
+        Tokens* ptr = head->tokens;
+        while (ptr != NULL)
+        {
+            ptr->freq = ptr->freq/(double)head->tokenCount;
+            ptr = ptr->next;
+        }
+        head = head->next;
+    }
+}
+
+// Merge two tokens lists and compute the mean
+Tokens* computeMean(Files* f1, Files* f2)
+{
+    Tokens* t1 = f1->tokens;
+    Tokens* t2 = f2->tokens;
+    if (t1 == NULL && t2 == NULL)
+    {
+        return NULL;
+    }
+
+    Tokens* mean = (Tokens*) malloc(sizeof(Tokens));
+    mean->next = NULL;
+    if (t2 == NULL || strcmp(t1->word, t2->word) < 0)
+    {
+        mean->word = (char*) malloc(strlen(t1->word) + 1);
+        strcpy(mean->word, t1->word);
+        mean->freq = t1->freq/2;
+        t1 = t1->next;
+    }
+    else if (t1 == NULL || strcmp(t1->word, t2->word) > 0)
+    {
+        mean->word = (char*) malloc(strlen(t2->word) + 1);
+        strcpy(mean->word, t2->word);
+        mean->freq = t2->freq/2;
+        t2 = t2->next;
+    }
+    else // strcmp(t1->word, t2->word) == 0
+    {
+        mean->word = (char*) malloc(strlen(t1->word) + 1);
+        strcpy(mean->word, t1->word);
+        mean->freq = (t1->freq + t2->freq)/2;
+        t1 = t1->next;
+        t2 = t2->next;
+    }
+
+    Tokens* ptr = mean;
+    while (t1 != NULL || t2 != NULL)
+    {
+        ptr->next = (Tokens*) malloc(sizeof(Tokens*));
+        ptr = ptr->next;
+        ptr->next = NULL;
+        if (t2 == NULL || strcmp(t1->word, t2->word) < 0)
+        {
+            ptr->word = (char*) malloc(strlen(t1->word) + 1);
+            strcpy(ptr->word, t1->word);
+            ptr->freq = t1->freq/2;
+            t1 = t1->next;
+        }
+        else if (t1 == NULL || strcmp(t1->word, t2->word) > 0)
+        {
+            ptr->word = (char*) malloc(strlen(t2->word) + 1);
+            strcpy(ptr->word, t2->word);
+            ptr->freq = t2->freq/2;
+            t2 = t2->next;
+        }
+        else
+        {
+            ptr->word = (char*) malloc(strlen(t1->word) + 1);
+            strcpy(ptr->word, t1->word);
+            ptr->freq = (t1->freq + t2->freq)/2;
+            t1 = t1->next;
+            t2 = t2->next;
+        }
+    }
+
+    return mean;
+}
+
+double computeKLD(Tokens* mean, Tokens* t)
+{
+    double result = 0;
+    while (t != NULL)
+    {
+        while (strcmp(mean->word, t->word) != 0)
+        {
+            mean = mean->next;
+        }
+        result += t->freq*log(t->freq/mean->freq);
+        t = t->next;
+    }
+    return result;
 }
 
 int main (int argc, char** argv) {
@@ -239,7 +411,43 @@ int main (int argc, char** argv) {
     tokenizer(fp2, "./test1.txt", filesHead); // I can let this return the last files node to reduce time
     fclose(fp2);
 
-    filesToString(filesHead);
+    filesHead = mergesortFiles(filesHead);
+    getProb(filesHead);
+
+    Files* f1 = filesHead;
+    char* color_default = "\033[0m";
+    char* color_red = "\033[0;31m";
+    char* color_green = "\033[0;32m";
+    char* color_yellow = "\033[0;33m";
+    char* color_blue = "\033[0;34m";
+    char* color_cyan = "\033[0;36m";
+    char* color = NULL;
+    while (f1 != NULL)
+    {
+        if (f1->next == NULL)
+        {
+            printf("Only one file found, stopped\n");
+            return EXIT_FAILURE;
+        }
+        Files* f2 = filesHead->next;
+        while (f2 != NULL)
+        {
+            Tokens* mean = computeMean(f1, f2);
+            double k1 = computeKLD(mean, f1->tokens);
+            double k2 = computeKLD(mean, f2->tokens);
+            freeTokens(mean);
+            double result = (k1 + k2)/2;
+            if (result > 0.3) color = color_default;
+            else if (result > 0.25) color = color_blue;
+            else if (result > 0.2) color = color_cyan;
+            else if (result > 0.15) color = color_green;
+            else if (result > 0.1) color = color_yellow;
+            else color = color_red;
+            printf("%s%f%s \"%s\" and \"%s\"", color, result, color_default, f1->fileName, f2->fileName);
+            f2 = f2->next;
+        }
+        f1 = f1->next;
+    }
 
     freeFiles(filesHead);
 
