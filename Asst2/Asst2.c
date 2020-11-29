@@ -379,9 +379,9 @@ int main (int argc, char** argv) {
 
     // scan through dir
     // found somefile.txt
-/*    FILE* fp1 = fopen("test1.txt", "r");
+    FILE* fp1 = fopen("test1.txt", "r");
     tokenizer(fp1, "./test1.txt", filesHead);
-    fclose(fp1);*/
+    fclose(fp1);
     FILE* fp2 = fopen("test0.txt", "r");
     tokenizer(fp2, "./test0.txt", filesHead);
     fclose(fp2);
@@ -409,7 +409,7 @@ int main (int argc, char** argv) {
     char* color = NULL;
     while (f1->next != NULL)
     {
-        Files* f2 = filesHead->next;
+        Files* f2 = f1->next;
         while (f2 != NULL)
         {
             Tokens* mean = computeMean(f1, f2);
