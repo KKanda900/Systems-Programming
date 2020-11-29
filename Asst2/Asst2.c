@@ -4,11 +4,13 @@
 #include <ctype.h>
 #include <pthread.h>
 #include <math.h>
+#include <dirent.h>
+#include <errno.h>
 
 // Linked List for word tokens in a file.
 typedef struct Tokens
 {
-    char* word;
+    char* word; // be sure to use malloc when initializing word
     double freq;
     struct Tokens* next;
 } Tokens;
@@ -17,17 +19,33 @@ typedef struct Tokens
 typedef struct Files
 {
     struct Tokens* tokens;
-    char* fileName;
+    char* fileName; // be sure to use malloc when initializing fileName
+    FILE* fp;
     int tokenCount;
     struct Files* next;
 } Files;
 
+typedef struct Threads
+{
+    pthread_t threadID;
+    struct Threads* next;
+} Threads;
+
+pthread_mutex_t fileListLock;
+Files* filesHead;
+Files* lastFile;
+
 void filesToString (Files* f);
 void tokensToString (Tokens* t);
+void freeThreads(Threads* head);
 void freeFiles (Files* head);
 void freeTokens (Tokens* head);
+Threads* appendThread(Threads* last);
+Files* appendFile(FILE* f, char* fileName);
 
-void tokenizer (FILE* f, char* filename, Files* ptr);
+void* directory_handler(void* direct);
+
+void* tokenizer (void* arg);
 char* getBuff (char* oldBuff, int count);
 char* getToken (FILE* f);
 void insertToken (Files* f, char* word);
@@ -62,7 +80,17 @@ void filesToString (Files* f)
     printf("end of list\n");
 }
 
-// Free all Files node from the given head.
+// Free all Threads node starting from the given head.
+void freeThreads (Threads* head)
+{
+    if (head == NULL) return;
+
+    Threads* next = head->next;
+    free(head);
+    freeThreads(next);
+}
+
+// Free all Files node starting from the given head.
 void freeFiles (Files* head)
 {
     if (head == NULL) return;
@@ -74,7 +102,7 @@ void freeFiles (Files* head)
     freeFiles(next);
 }
 
-// Free all Tokens node from the given head.
+// Free all Tokens node starting from the given head.
 void freeTokens (Tokens* head)
 {
     if (head == NULL) return;
@@ -83,6 +111,56 @@ void freeTokens (Tokens* head)
     Tokens* next = head->next;
     free(head);
     freeTokens(next);
+}
+
+// create new node at the end of thread list
+Threads* appendThread(Threads* last)
+{
+    Threads* newNode = NULL;
+    if (last == NULL) // first node
+    {
+        newNode = (Threads*) malloc(sizeof(Threads));
+    }
+    else if (last->next != NULL)
+    {
+        printf("Not pointing to the end of list, check the code\n");
+        return NULL;
+    }
+    else
+    {
+        last->next = (Threads*) malloc(sizeof(Threads));
+        newNode = last->next;
+    }
+    newNode->next = NULL;
+    return newNode;
+}
+
+// create new node at the end of file list
+Files* appendFile(FILE* f, char* fileName)
+{
+    if (lastFile->fileName == NULL) // This is a new head of Files
+    {
+        lastFile->fileName = malloc(strlen(fileName) + 1);
+        strcpy(lastFile->fileName, fileName);
+        lastFile->fp = f;
+    }
+    else
+    {
+        while (lastFile->next != NULL) // find the end of list
+        {
+            lastFile = lastFile->next;
+        }
+        lastFile->next = (Files *) malloc(sizeof(Files));
+        lastFile = lastFile->next;
+
+        lastFile->tokens = NULL;
+        lastFile->fileName = malloc(strlen(fileName) + 1);
+        strcpy(lastFile->fileName, fileName);
+        lastFile->fp = f;
+        lastFile->tokenCount = 0;
+        lastFile->next = NULL;
+    }
+    return lastFile;
 }
 
 // move string to a bigger buffer
@@ -176,43 +254,21 @@ void insertToken (Files* f, char* word)
 }
 
 // Take a opened FILE and a pointer pointing to any node of the shared file list, construct tokens for the given file.
-// Also save the filename for later use
-void tokenizer (FILE* f, char* filename, Files* ptr)
+void* tokenizer (void* arg)
 {
-    // move below out to directory handling
-    if (ptr->fileName == NULL) // This is a new head of Files
-    {
-        ptr->fileName = malloc(strlen(filename) + 1);
-        strcpy(ptr->fileName, filename);
-    }
-    else
-    {
-        while (ptr->next != NULL) // find the end of list
-        {
-            ptr = ptr->next;
-        }
-        ptr->next = (Files *) malloc(sizeof(Files));
-        ptr = ptr->next;
-
-        ptr->tokens = NULL;
-        ptr->fileName = malloc(strlen(filename) + 1);
-        strcpy(ptr->fileName, filename);
-        ptr->tokenCount = 0;
-        ptr->next = NULL;
-    }
-    // move above out to directory handling
-
-    char* cleanedToken = getToken(f);
+    Files* ptr = (Files*) arg;
+    char* cleanedToken = getToken(ptr->fp);
     while (strlen(cleanedToken) != 0)
     {
         ptr->tokenCount++;
         insertToken(ptr, cleanedToken);
         char* oldToken = cleanedToken; // just free cleanedToken gives warning for some reason
         free(oldToken);
-        cleanedToken = getToken(f);
+        cleanedToken = getToken(ptr->fp);
     }
     free(cleanedToken); // free the last cleaned token
-    // return ptr; // for faster file insertion
+    fclose(ptr->fp);
+    return NULL;
 }
 
 // Merge two sorted Files lists. Both left & right are not NULL is ensured by caller
@@ -360,39 +416,118 @@ double computeKLD(Tokens* mean, Tokens* t)
     return result;
 }
 
+void* directory_handler(void* direct)
+{
+    char* address = (char*) direct;
+    DIR *dir = opendir(address);
+
+    if (dir == NULL)
+    {
+        printf("Cannot open %s (%d)\n", address, errno);
+        perror(address);
+        free(address);
+        exit(1);
+    }
+    else
+    {
+        Threads* dirHead = NULL;
+        Threads* tptr = NULL;
+        struct dirent *dp;
+
+        while ((dp = readdir(dir)) != NULL)
+        {
+            if ((strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)) continue;
+
+            if (dp->d_type == DT_DIR)
+            {
+                char* nextDir = (char*) malloc(strlen(address) + strlen(dp->d_name) + 2);
+                strcpy(nextDir, address);
+                strcat(nextDir, dp->d_name);
+                strcat(nextDir, "/\0");
+
+                printf("Opening dir %s\n", nextDir);
+
+                tptr = appendThread(tptr);
+                if (dirHead == NULL) dirHead = tptr;
+                pthread_create(&(tptr->threadID), NULL, directory_handler, nextDir);
+                free(nextDir);
+            }
+            else // or just else?
+            {
+                char* nextFile = (char*) malloc(strlen(address) + strlen(dp->d_name) + 1);
+                strcpy(nextFile, address);
+                strcat(nextFile, dp->d_name);
+
+                printf("Opening file %s\n", nextFile);
+                FILE* fp = fopen(nextFile, "r");
+                if (fp == NULL)
+                {
+                    printf("Cannot open %s (%d)\n", nextFile, errno);
+                    free(nextFile);
+                    continue;
+                }
+
+                pthread_mutex_lock(&fileListLock);
+                Files* newFile = appendFile(fp, nextFile);
+                pthread_mutex_unlock(&fileListLock);
+
+                tptr = appendThread(tptr);
+                if (dirHead == NULL) dirHead = tptr;
+                pthread_create(&(tptr->threadID), NULL, tokenizer, newFile);
+                free(nextFile);
+            }
+        }
+
+        Threads* ttj = dirHead;
+        while (ttj != NULL)
+        {
+            pthread_join(ttj->threadID, NULL);
+            ttj = ttj->next;
+        }
+        freeThreads(dirHead);
+        free(address);
+        closedir(dir);
+
+        pthread_exit(NULL);
+    }
+}
+
 int main (int argc, char** argv) {
-/*    printf("%d\n", argc);
-    if (argc < 2) {
+    if (argc < 2)
+    {
         printf("Provide a directory.\n");
         return EXIT_FAILURE;
     }
 
-    int dirnlen = (int)strlen(argv[1]);
-    char* dir = (char*)malloc(dirnlen+1); //+1 for '\0'
-    strcpy(dir, argv[1]);*/
+    int dirlen = (int) strlen(argv[1]);
+    if (argv[1][dirlen - 1] != '/') dirlen++;
 
-    Files* filesHead = (Files*) malloc(sizeof(Files));
+    char* dir = (char*) malloc(dirlen + 1); // +1 for '\0'
+    strcpy(dir, argv[1]);
+    if (dirlen != strlen(argv[1])) strcat(dir, "/\0");
+    printf("%s\n", dir);
+
+    pthread_mutex_init(&fileListLock, NULL);
+    pthread_t init;
+
+    filesHead = (Files*) malloc(sizeof(Files));
     filesHead->tokens = NULL;
     filesHead->next = NULL;
     filesHead->fileName = NULL;
+    filesHead->fp = NULL;
     filesHead->tokenCount = 0;
+    lastFile = filesHead;
 
-    // scan through dir
-    // found somefile.txt
-    FILE* fp1 = fopen("test1.txt", "r");
-    tokenizer(fp1, "./test1.txt", filesHead);
-    fclose(fp1);
-    FILE* fp2 = fopen("test0.txt", "r");
-    tokenizer(fp2, "./test0.txt", filesHead);
-    fclose(fp2);
-    FILE* fp3 = fopen("test2.txt", "r");
-    tokenizer(fp3, "./test2.txt", filesHead);
-    fclose(fp3);
+    pthread_create(&init, NULL, directory_handler, dir);
 
-    // start from here
+    pthread_join(init, NULL);
+
+    filesToString(filesHead);
+
+    // math starts from here
     if (filesHead->next == NULL)
     {
-        printf("Only one file found, stopped\n");
+        printf("No or only one file found, stopped\n");
         return EXIT_FAILURE;
     }
 
