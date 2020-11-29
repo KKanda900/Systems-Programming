@@ -312,7 +312,7 @@ Tokens* computeMean(Files* f1, Files* f2)
     {
         if (ptr->word != NULL) // not the first node
         {
-            ptr->next = (Tokens*) malloc(sizeof(Tokens*));
+            ptr->next = (Tokens*) malloc(sizeof(Tokens));
             ptr = ptr->next;
             ptr->next = NULL;
         }
@@ -353,7 +353,7 @@ double computeKLD(Tokens* mean, Tokens* t)
         {
             mean = mean->next;
         }
-        result += t->freq*log(t->freq/mean->freq);
+        result += t->freq*log10(t->freq/mean->freq);
         t = t->next;
         mean = mean->next;
     }
@@ -379,20 +379,25 @@ int main (int argc, char** argv) {
 
     // scan through dir
     // found somefile.txt
-/*    FILE* fp1 = fopen("/Users/cjx10/Documents/214/Asst2/test1.txt", "r");
+/*    FILE* fp1 = fopen("test1.txt", "r");
     tokenizer(fp1, "./test1.txt", filesHead);
     fclose(fp1);*/
-    FILE* fp2 = fopen("/Users/cjx10/Documents/214/Asst2/test0.txt", "r");
+    FILE* fp2 = fopen("test0.txt", "r");
     tokenizer(fp2, "./test0.txt", filesHead);
     fclose(fp2);
-    FILE* fp3 = fopen("/Users/cjx10/Documents/214/Asst2/test2.txt", "r");
+    FILE* fp3 = fopen("test2.txt", "r");
     tokenizer(fp3, "./test2.txt", filesHead);
     fclose(fp3);
 
-    filesToString(filesHead);
+    // start from here
+    if (filesHead->next == NULL)
+    {
+        printf("Only one file found, stopped\n");
+        return EXIT_FAILURE;
+    }
+    
     filesHead = mergesortFiles(filesHead);
     getProb(filesHead);
-    filesToString(filesHead);
 
     Files* f1 = filesHead;
     char* color_default = "\033[0m";
@@ -404,16 +409,10 @@ int main (int argc, char** argv) {
     char* color = NULL;
     while (f1 != NULL)
     {
-        if (f1->next == NULL)
-        {
-            printf("Only one file found, stopped\n");
-            return EXIT_FAILURE;
-        }
         Files* f2 = filesHead->next;
         while (f2 != NULL)
         {
             Tokens* mean = computeMean(f1, f2);
-            tokensToString(mean);
             double result = (computeKLD(mean, f1->tokens) + computeKLD(mean, f2->tokens))/2;
             freeTokens(mean);
 
