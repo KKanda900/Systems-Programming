@@ -532,8 +532,6 @@ int main (int argc, char** argv) {
 
     pthread_join(init, NULL);
 
-    filesToString(filesHead);
-
     // math starts from here
     if (filesHead->next == NULL)
     {
