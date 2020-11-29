@@ -7,7 +7,14 @@
 #include <dirent.h>
 #include <errno.h>
 
-// Linked List for word tokens in a file.
+/*
+ * This struct type is used to hold the tokens for the files.
+ * 
+ * It contains three fields: 
+ *  1. char*word -> the word in the file
+ *  2. double freq -> the frequency of the word
+ *  3. struct Tokens*next -> the next token for the file
+ */
 typedef struct Tokens
 {
     char* word; // be sure to use malloc when initializing word
@@ -15,7 +22,16 @@ typedef struct Tokens
     struct Tokens* next;
 } Tokens;
 
-// Linked List for files.
+/*
+ * This struct type is used to contain the contents of each file.
+ * 
+ * It contains five fields:
+ *  1. The tokens for the files
+ *  2. The name of the file
+ *  3. The FILE pointer of the filename
+ *  4. The number of tokens.
+ *  5. The next file in the list.
+ */
 typedef struct Files
 {
     struct Tokens* tokens;
@@ -25,14 +41,28 @@ typedef struct Files
     struct Files* next;
 } Files;
 
-// Linked List for threads.
+/*
+ * This struct type is used to contain the threads that will be produced in
+ * the directory handler.
+ * 
+ * It contains two fields:
+ *  1. The thread id
+ *  2. The next thread in the list.
+ */
 typedef struct Threads
 {
     pthread_t threadID;
     struct Threads* next;
 } Threads;
 
-// Struct for passing args to directory handling.
+/*
+ * This struct type is used to contain the directories and files for that directory.
+ * 
+ * It contains three fields:
+ *  1. The mutex lock
+ *  2. The directory name
+ *  3. The front of the files list
+ */
 typedef struct DirHandleArgs
 {
     pthread_mutex_t* lock;
@@ -40,6 +70,9 @@ typedef struct DirHandleArgs
     Files* filesHead;
 } DirHandleArgs;
 
+/* 
+ * These are function prototypes are used when tokenizing the files. 
+ */ 
 void filesToString (Files* f);
 void tokensToString (Tokens* t);
 void freeThreads(Threads* head);
@@ -48,21 +81,36 @@ void freeTokens (Tokens* head);
 Threads* appendThread (Threads* last);
 Files* appendFile (FILE* f, char* fileName, Files* lastFile);
 
+/*
+ * This function prototype is used for handling directories that are encountered.
+ */
 void* directory_handler(void* direct);
 
+/* 
+ * These function prototypes are used also for tokenizing files.
+ */
 void* tokenizer (void* arg);
 char* getBuff (char* oldBuff, int count);
 char* getToken (FILE* f);
 void insertToken (Files* f, char* word);
 
+/* 
+ * These function prototypes are used for comparing files.
+ */
 Files* mergesortFiles (Files* head);
 Files* mergeFiles (Files* left, Files* right);
 void getProb (Files* head);
 
+/* 
+ * These function prototypes are used when getting the mean and KLD.
+ */
 Tokens* computeMean (Files* f1, Files* f2);
 double computeKLD (Tokens* mean, Tokens* t);
 
-// Print out the token list
+/* 
+ * The tokensToString function will take the strut of tokens and print
+ * out the token list.
+ */
 void tokensToString (Tokens* t)
 {
     while (t != NULL)
@@ -73,7 +121,10 @@ void tokensToString (Tokens* t)
     printf("\tend of list\n");
 }
 
-// Print out the file list
+/* 
+ * filesToString function will take Files struct as an argument and print
+ * the files list using tokensToString as a helper function.
+ */
 void filesToString (Files* f)
 {
     while (f != NULL)
@@ -85,7 +136,10 @@ void filesToString (Files* f)
     printf("end of list\n");
 }
 
-// Free all Threads node starting from the given head.
+/* 
+ * freeThreads function will take the list of threads that were created (Threads struct)
+ * and free the threads in the list starting from head.
+ */
 void freeThreads (Threads* head)
 {
     if (head == NULL) return;
@@ -95,7 +149,10 @@ void freeThreads (Threads* head)
     freeThreads(next);
 }
 
-// Free all Files node starting from the given head.
+/* 
+ * freeFiles function will take the list of Files that were created and free the 
+ * File pointer starting from the head.
+ */
 void freeFiles (Files* head)
 {
     if (head == NULL) return;
@@ -107,7 +164,10 @@ void freeFiles (Files* head)
     freeFiles(next);
 }
 
-// Free all Tokens node starting from the given head.
+/*  
+ * freeTokens function will take the list of tokens that were created and free the 
+ * Tokens pointer starting from the head.
+ */
 void freeTokens (Tokens* head)
 {
     if (head == NULL) return;
@@ -118,7 +178,10 @@ void freeTokens (Tokens* head)
     freeTokens(next);
 }
 
-// create new node at the end of thread list
+/* 
+ * appendThread function will take the list of threads that were created starting from
+ * the last one and append a new thread to it when called.
+ */
 Threads* appendThread (Threads* last)
 {
     Threads* newNode = NULL;
@@ -136,7 +199,10 @@ Threads* appendThread (Threads* last)
     return newNode;
 }
 
-// create new node at the end of file list
+/* 
+ * appendFile will take a File pointer and the name of the file and append the file to 
+ * the end of that list.
+ */
 Files* appendFile (FILE* f, char* fileName, Files* lastFile)
 {
     if (lastFile->fileName == NULL) // This is a new head of Files
@@ -164,7 +230,10 @@ Files* appendFile (FILE* f, char* fileName, Files* lastFile)
     return lastFile;
 }
 
-// move string to a bigger buffer
+/*
+ * getBuff takes a old buffer and the count that you want to increase the old buffer 
+ * and moves a string to a bigger buffer
+ */
 char* getBuff (char* oldBuff, int count)
 {
     char* newBuff = malloc(1024 * count);
@@ -173,7 +242,10 @@ char* getBuff (char* oldBuff, int count)
     return newBuff;
 }
 
-// omit non alpha/hyphen char and turn alpha into lower case
+/* 
+ * getToken will take a File pointer then omit non alpha/hyphen char and turn alpha
+ * into lower case.
+ */
 char* getToken (FILE* f)
 {
     int validCount = 0;
@@ -205,7 +277,10 @@ char* getToken (FILE* f)
     return string;
 }
 
-// Insert the given token into the token list
+/*
+ * insertToken will take the Files list and the word (token) and insert it into the 
+ * tokens list.
+ */
 void insertToken (Files* f, char* word)
 {
     Tokens* ptr = NULL;
@@ -259,7 +334,15 @@ void insertToken (Files* f, char* word)
     ptr->freq = 1;
 }
 
-// Take a opened FILE and a pointer pointing to any node of the shared file list, construct tokens for the given file.
+/*
+ * tokenizer function is our file handler which will be used to create new threads from in the directory handler function.
+ * It takes a void pointer which is type casted into the Files list and creates tokens based on the list.
+ * 
+ * Functionally it takes a opened FILE and a pointer pointing to any node of the shared file list, constructs
+ * for the given file. The tokenizer contains helper methods that help when tokenizing the Files like:
+ *  1. getToken -> gets the token
+ *  2. insertToken -> insert the token in the specific files token list
+ */
 void* tokenizer (void* arg)
 {
     Files* ptr = (Files*) arg;
@@ -277,7 +360,10 @@ void* tokenizer (void* arg)
     return NULL;
 }
 
-// Merge two sorted Files lists. Both left & right are not NULL is ensured by caller
+/*
+ * mergeFiles takes two files list and merges the two sorted files list. Both of left and right lists are 
+ * NOT NULL and this is ensured by the caller.
+ */
 Files* mergeFiles(Files* left, Files* right)
 {
     Files* ptr = NULL;
@@ -321,7 +407,9 @@ Files* mergeFiles(Files* left, Files* right)
     return sortedHead;
 }
 
-// Sorting Files list with merge sort
+/*
+ * mergesortFiles function takes one list of Files and sorts the list using merge sort.
+ */
 Files* mergesortFiles(Files* head)
 {
     if (head == NULL || head->next == NULL) return head; // only 1 node in the list
@@ -343,7 +431,9 @@ Files* mergesortFiles(Files* head)
     return mergeFiles(mergesortFiles(left), mergesortFiles(right));
 }
 
-// Turn frequency of tokens into prob
+/*
+ * getProb takes a Files list's tokens and uses the frequency of the tokens into a probability.
+ */
 void getProb(Files* head)
 {
     while (head != NULL)
@@ -358,7 +448,9 @@ void getProb(Files* head)
     }
 }
 
-// Merge two tokens lists and compute the mean
+/*
+ * computeMean takes two Files list f1 and f2 and merges the tokens list in them to compute a mean.
+ */
 Tokens* computeMean(Files* f1, Files* f2)
 {
     Tokens* t1 = f1->tokens;
@@ -406,6 +498,12 @@ Tokens* computeMean(Files* f1, Files* f2)
     return mean;
 }
 
+/* 
+ * computeKLD takes the mean tokens and an another tokens list t. 
+ * 
+ * When you find the token in T also in mean you multiply the discrete probability of its occurrence in the
+ * list by the log of its discrete probability in the list divided by the probability computed for it in means lists.
+ */
 double computeKLD(Tokens* mean, Tokens* t)
 {
     double result = 0;
@@ -422,6 +520,20 @@ double computeKLD(Tokens* mean, Tokens* t)
     return result;
 }
 
+/*
+ * directory_handler is takes a void pointer which is type casted into a string and opens a new directory/file 
+ * when its found or returns gracefully if that directory isn't found.
+ * 
+ * Functionally it opens the directory that it is given with opendir() and iterates through the contents of that directory
+ * using readdir(). When it finds a subdirectory it opens a new pthread using a copy of the file handler and 
+ * the nextDir string to open another directory. Otherwise if it is a regular file it opens another pthread using a copy of the 
+ * file handler (tokenizer) which it passes a Files list to open every file.
+ * 
+ * Before creating a new thread it synchronizes appending to the file lists so it happens in the order of the 
+ * directory you are working with then proceeds to create a pthread.
+ * 
+ * After nothing is found at the very it joins the threads and exits.
+ */
 void* directory_handler(void* direct)
 {
     DirHandleArgs* args = (DirHandleArgs*) direct;
@@ -499,6 +611,16 @@ void* directory_handler(void* direct)
     }
 }
 
+/*
+ * The main function will take the path name (in argv[1]) where argv[1] contains the 
+ * the root directory that we will start traversing to conduct the file analysis. 
+ * 
+ * It initializes the root directory and Files list to start appending to when the analysis starts and
+ * the very end after it finishs compares the files using the probability that was found from it.
+ * 
+ * The main function will return EXIT_SUCCESS if the job is done or EXIT_FAILURE if main isn't given
+ * two arguments in the start.
+ */
 int main (int argc, char** argv) {
     if (argc < 2)
     {
@@ -532,11 +654,12 @@ int main (int argc, char** argv) {
 
     pthread_join(init, NULL);
 
+    filesToString(filesHead);
+
     // math starts from here
     if (filesHead->next == NULL)
     {
         printf("No or only one file found, stopped\n");
-        freeFiles(filesHead);
         return EXIT_FAILURE;
     }
 
