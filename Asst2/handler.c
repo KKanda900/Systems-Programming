@@ -99,6 +99,7 @@ void *directory_handler(void *direct)
             if (dp->d_type == DT_DIR)
             {
                 addNode(args->directories, temp);
+                strcpy(args->directory, temp);
                 printf("Node Directory added: %s\n", temp);
 
 
@@ -108,7 +109,7 @@ void *directory_handler(void *direct)
             }
             else if (dp->d_type == DT_REG)
             {
-                pthread_create(&args->id[ids++], NULL, &file_handler, (void *)args->directory);
+                pthread_create(&args->id[ids++], NULL, &file_handler, (void *)args->directories->data);
             }
         }
 
@@ -146,6 +147,7 @@ int main(int argc, char **argv)
     thread_args* args = malloc(sizeof(thread_args));
     strcpy(args->directory, argv[1]);
     args->directories = malloc(sizeof(directory_names));
+    addNode(args->directories, argv[1]);
 
     directory_handler((void *)args);
 
