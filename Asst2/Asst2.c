@@ -395,7 +395,7 @@ int main (int argc, char** argv) {
         printf("Only one file found, stopped\n");
         return EXIT_FAILURE;
     }
-    
+
     filesHead = mergesortFiles(filesHead);
     getProb(filesHead);
 
@@ -407,7 +407,7 @@ int main (int argc, char** argv) {
     char* color_blue = "\033[0;34m";
     char* color_cyan = "\033[0;36m";
     char* color = NULL;
-    while (f1 != NULL)
+    while (f1->next != NULL)
     {
         Files* f2 = filesHead->next;
         while (f2 != NULL)
