@@ -12,19 +12,26 @@
 int ids = 0;
 int j = 0;
 
+char * temp;
+
 typedef struct directory_names
 {
     char data[200000];
-    pthread_t id[100000];
     struct directory_names *next;
 } directory_names;
 
-typedef struct args_struct
+typedef struct thread_args{
+    char directory[200000];
+    directory_names * directories;
+    //add mutex pointer here
+    pthread_t id[100000];
+} thread_args;
+
+typedef struct directory_copy
 {
     char data[200000];
-    pthread_t id[100000];
     struct args_struct *next;
-} args_struct;
+} directory_copy;
 
 directory_names *addNode(directory_names *front, char *data)
 {
@@ -33,7 +40,7 @@ directory_names *addNode(directory_names *front, char *data)
     newNode->next = NULL;
 
     if (front == NULL)
-    {
+    { 
         front = newNode;
         free(newNode);
         return front;
@@ -48,11 +55,6 @@ directory_names *addNode(directory_names *front, char *data)
 
 void free_list(directory_names *front)
 {
-	/* if (front == NULL){
-		return;
-	} */
-
-	/* directory_names *ptr = front; */
 	directory_names*tmp;
     while (front != NULL) 
 	{
@@ -60,29 +62,24 @@ void free_list(directory_names *front)
         front = front->next;
 		free(tmp); 
 	}
-
-	/* free(ptr); */
 }
 
 void *file_handler(void *file)
 {
-    directory_names *f = (directory_names *)file;
-    printf("File: %s\n", f->data);
+    printf("File: %s\n", (char*)file);
     return NULL;
 }
 
 void *directory_handler(void *direct)
 {
-    directory_names *directory = (directory_names *)direct;
+    thread_args* args = (thread_args*)direct;
 
-    char *path = directory->data;
-
-    DIR *dir = opendir(path);
+    DIR *dir = opendir(args->directory);
     struct dirent *dp;
 
     if (dir == NULL)
     {
-        perror(directory->data);
+        perror(args->directory);
         exit(1);
     }
     else
@@ -93,32 +90,31 @@ void *directory_handler(void *direct)
             {
                 continue;
             }
-            char localname[strlen(directory->data) + strlen(dp->d_name) + 2];
+            temp = malloc(strlen(args->directory) + strlen(dp->d_name) + 2);
+            strcpy(temp, args->directory);
+            strcat(temp, "/");
+            strcat(temp, dp->d_name);
 
-            strcpy(localname, path);
-            strcat(localname, "/");
-            strcat(localname, dp->d_name);
-            addNode(directory, localname);
-
-            if (DEBUG == 0)
-            {
-                printf("%d\n", dp->d_type);
-            }
 
             if (dp->d_type == DT_DIR)
             {
-                printf("Node Directory added: %s\n", localname);
-                pthread_create(&directory->id[ids++], NULL, &directory_handler, (void *)directory);
+                addNode(args->directories, temp);
+                printf("Node Directory added: %s\n", temp);
+
+
+
+
+                pthread_create(&args->id[ids++], NULL, &directory_handler, (void *)args);
             }
             else if (dp->d_type == DT_REG)
             {
-                pthread_create(&directory->id[ids++], NULL, &file_handler, (void *)directory);
+                pthread_create(&args->id[ids++], NULL, &file_handler, (void *)args->directory);
             }
         }
 
         while (j < ids)
         {
-            pthread_join(directory->id[j++], NULL);
+            pthread_join(args->id[j++], NULL);
         }
 
         closedir(dir);
@@ -146,17 +142,14 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    if (DEBUG == 0)
-    {
-        printf("%f\n", log10(2));
-    }
 
-    directory_names *directory = malloc(sizeof(directory_names));
-    addNode(directory, argv[1]);
+    thread_args* args = malloc(sizeof(thread_args));
+    strcpy(args->directory, argv[1]);
+    args->directories = malloc(sizeof(directory_names));
 
-    directory_handler((void *)directory);
+    directory_handler((void *)args);
 
-    free_list(directory);
+    free_list(args->directories);
     
 
     return 0;
