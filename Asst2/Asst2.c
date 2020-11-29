@@ -44,7 +44,7 @@ void tokensToString (Tokens* t)
 {
     while (t != NULL)
     {
-        printf("\t%s %d ->\n", t->word, t->freq);
+        printf("\t%s %.2f ->\n", t->word, t->freq);
         t = t->next;
     }
     printf("\tend of list\n");
@@ -107,24 +107,17 @@ char* getToken (FILE* f)
     while (c != EOF && !isspace(c))
     {
         ch = (char)c;
-
         if (isalpha(ch) || ch == '-')
         {
             validCount++;
-
             if (strlen(buff) == buffCount * 1024 - 1)
             {
                 buffCount++;
                 buff = getBuff(buff, buffCount);
             }
-
-            if (isupper(ch))
-            {
-                ch += 32;
-            }
+            if (isupper(ch)) ch += 32; // to lower case
             strncat(buff, &ch, 1);
         }
-
         c = fgetc(f);
     }
     char* string = malloc(validCount + 1);
@@ -214,52 +207,55 @@ void tokenizer (FILE* f, char* filename, Files* ptr)
     {
         ptr->tokenCount++;
         insertToken(ptr, cleanedToken);
-        char* oldToken = cleanedToken;
+        char* oldToken = cleanedToken; // just free cleanedToken gives warning for some reason
         free(oldToken);
         cleanedToken = getToken(f);
     }
-    free(cleanedToken);
-    // return ptr;
+    free(cleanedToken); // free the last cleaned token
+    // return ptr; // for faster file insertion
 }
 
 // Merge two sorted Files lists
 Files* mergeFiles(Files* left, Files* right) // both left & right are not NULL is ensured
 {
+    Files* ptr = NULL;
     Files* sortedHead = NULL;
-    if (left->tokenCount > right->tokenCount)
-    {
-        sortedHead = right;
-        right = right->next;
-    }
-    else
-    {
-        sortedHead = left;
-        left = left->next;
-    }
-    Files* ptr = sortedHead;
 
     while (left != NULL && right != NULL)
     {
         if (left->tokenCount > right->tokenCount)
         {
-            ptr->next = right;
+            if (sortedHead == NULL) // first node
+            {
+                ptr = right;
+                sortedHead = ptr;
+            }
+            else
+            {
+                ptr->next = right;
+                ptr = ptr->next;
+            }
             right = right->next;
         }
         else
         {
-            ptr->next = left;
+            if (sortedHead == NULL) // first node
+            {
+                ptr = left;
+                sortedHead = ptr;
+            }
+            else
+            {
+                ptr->next = left;
+                ptr = ptr->next;
+            }
             left = left->next;
         }
-        ptr = ptr->next;
     }
-    if (right == NULL)
-    {
-        ptr->next = left;
-    }
-    else
-    {
-        ptr->next = right;
-    }
+
+    if (right == NULL) ptr->next = left;
+    else ptr->next = right;
+
     return sortedHead;
 }
 
@@ -314,7 +310,7 @@ Tokens* computeMean(Files* f1, Files* f2)
 
     Tokens* mean = (Tokens*) malloc(sizeof(Tokens));
     mean->next = NULL;
-    if (t2 == NULL || strcmp(t1->word, t2->word) < 0)
+    if (t2 == NULL || strcmp(t1->word, t2->word) < 0) // fix this later
     {
         mean->word = (char*) malloc(strlen(t1->word) + 1);
         strcpy(mean->word, t1->word);
@@ -343,14 +339,14 @@ Tokens* computeMean(Files* f1, Files* f2)
         ptr->next = (Tokens*) malloc(sizeof(Tokens*));
         ptr = ptr->next;
         ptr->next = NULL;
-        if (t2 == NULL || strcmp(t1->word, t2->word) < 0)
+        if (t2 == NULL || (t1 != NULL && strcmp(t1->word, t2->word) < 0))
         {
             ptr->word = (char*) malloc(strlen(t1->word) + 1);
             strcpy(ptr->word, t1->word);
             ptr->freq = t1->freq/2;
             t1 = t1->next;
         }
-        else if (t1 == NULL || strcmp(t1->word, t2->word) > 0)
+        else if (t1 == NULL || (t2 != NULL && strcmp(t1->word, t2->word) > 0))
         {
             ptr->word = (char*) malloc(strlen(t2->word) + 1);
             strcpy(ptr->word, t2->word);
@@ -381,6 +377,7 @@ double computeKLD(Tokens* mean, Tokens* t)
         }
         result += t->freq*log(t->freq/mean->freq);
         t = t->next;
+        mean = mean->next;
     }
     return result;
 }
@@ -404,15 +401,22 @@ int main (int argc, char** argv) {
 
     // scan through dir
     // found somefile.txt
-    FILE* fp1 = fopen("test0.txt", "r");
-    tokenizer(fp1, "./test0.txt", filesHead); // I can let this return the last files node to reduce time
+    FILE* fp1 = fopen("/Users/cjx10/Documents/214/Asst2/test1.txt", "r");
+    tokenizer(fp1, "./test1.txt", filesHead);
     fclose(fp1);
-    FILE* fp2 = fopen("test1.txt", "r");
-    tokenizer(fp2, "./test1.txt", filesHead); // I can let this return the last files node to reduce time
+    FILE* fp2 = fopen("/Users/cjx10/Documents/214/Asst2/test0.txt", "r");
+    tokenizer(fp2, "./test0.txt", filesHead);
     fclose(fp2);
+    FILE* fp3 = fopen("/Users/cjx10/Documents/214/Asst2/test2.txt", "r");
+    tokenizer(fp3, "./test2.txt", filesHead);
+    fclose(fp3);
 
+    filesToString(filesHead);
     filesHead = mergesortFiles(filesHead);
     getProb(filesHead);
+    filesToString(filesHead);
+
+    return 0;
 
     Files* f1 = filesHead;
     char* color_default = "\033[0m";
@@ -433,17 +437,18 @@ int main (int argc, char** argv) {
         while (f2 != NULL)
         {
             Tokens* mean = computeMean(f1, f2);
-            double k1 = computeKLD(mean, f1->tokens);
-            double k2 = computeKLD(mean, f2->tokens);
+            tokensToString(mean);
+            double result = (computeKLD(mean, f1->tokens) + computeKLD(mean, f2->tokens))/2;
             freeTokens(mean);
-            double result = (k1 + k2)/2;
+
             if (result > 0.3) color = color_default;
             else if (result > 0.25) color = color_blue;
             else if (result > 0.2) color = color_cyan;
             else if (result > 0.15) color = color_green;
             else if (result > 0.1) color = color_yellow;
             else color = color_red;
-            printf("%s%f%s \"%s\" and \"%s\"", color, result, color_default, f1->fileName, f2->fileName);
+
+            printf("%s%.2f%s \"%s\" and \"%s\"\n", color, result, color_default, f1->fileName, f2->fileName);
             f2 = f2->next;
         }
         f1 = f1->next;
