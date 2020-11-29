@@ -536,6 +536,7 @@ int main (int argc, char** argv) {
     if (filesHead->next == NULL)
     {
         printf("No or only one file found, stopped\n");
+        freeFiles(filesHead);
         return EXIT_FAILURE;
     }
 
