@@ -654,12 +654,11 @@ int main (int argc, char** argv) {
 
     pthread_join(init, NULL);
 
-    filesToString(filesHead);
-
     // math starts from here
     if (filesHead->next == NULL)
     {
         printf("No or only one file found, stopped\n");
+        freeFiles(filesHead);
         return EXIT_FAILURE;
     }
 
