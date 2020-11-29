@@ -25,23 +25,28 @@ typedef struct Files
     struct Files* next;
 } Files;
 
+// Linked List for threads.
 typedef struct Threads
 {
     pthread_t threadID;
     struct Threads* next;
 } Threads;
 
-pthread_mutex_t fileListLock;
-Files* filesHead;
-Files* lastFile;
+// Struct for passing args to directory handling. Do not initialize with malloc
+typedef struct DirHandleArgs
+{
+    pthread_mutex_t* lock;
+    char* dirName;
+    Files* filesHead;
+} DirHandleArgs;
 
 void filesToString (Files* f);
 void tokensToString (Tokens* t);
 void freeThreads(Threads* head);
 void freeFiles (Files* head);
 void freeTokens (Tokens* head);
-Threads* appendThread(Threads* last);
-Files* appendFile(FILE* f, char* fileName);
+Threads* appendThread (Threads* last);
+Files* appendFile (FILE* f, char* fileName, Files* lastFile);
 
 void* directory_handler(void* direct);
 
@@ -50,12 +55,12 @@ char* getBuff (char* oldBuff, int count);
 char* getToken (FILE* f);
 void insertToken (Files* f, char* word);
 
-Files* mergesortFiles(Files* head);
-Files* mergeFiles(Files* left, Files* right);
-void getProb(Files* head);
+Files* mergesortFiles (Files* head);
+Files* mergeFiles (Files* left, Files* right);
+void getProb (Files* head);
 
-Tokens* computeMean(Files* f1, Files* f2);
-double computeKLD(Tokens* mean, Tokens* t);
+Tokens* computeMean (Files* f1, Files* f2);
+double computeKLD (Tokens* mean, Tokens* t);
 
 // Print out the token list
 void tokensToString (Tokens* t)
@@ -114,7 +119,7 @@ void freeTokens (Tokens* head)
 }
 
 // create new node at the end of thread list
-Threads* appendThread(Threads* last)
+Threads* appendThread (Threads* last)
 {
     Threads* newNode = NULL;
     if (last == NULL) // first node
@@ -136,7 +141,7 @@ Threads* appendThread(Threads* last)
 }
 
 // create new node at the end of file list
-Files* appendFile(FILE* f, char* fileName)
+Files* appendFile (FILE* f, char* fileName, Files* lastFile)
 {
     if (lastFile->fileName == NULL) // This is a new head of Files
     {
@@ -423,14 +428,14 @@ double computeKLD(Tokens* mean, Tokens* t)
 
 void* directory_handler(void* direct)
 {
-    char* address = (char*) direct;
-    DIR *dir = opendir(address);
+    DirHandleArgs args = *(DirHandleArgs*)direct;
+    DIR *dir = opendir(args.dirName);
 
     if (dir == NULL)
     {
-        printf("Cannot open %s (%d)\n", address, errno);
-        perror(address);
-        free(address);
+        printf("Cannot open %s (%d)\n", args.dirName, errno);
+        perror(args.dirName);
+        free(args.dirName);
         exit(1);
     }
     else
@@ -445,8 +450,8 @@ void* directory_handler(void* direct)
 
             if (dp->d_type == DT_DIR)
             {
-                char* nextDir = (char*) malloc(strlen(address) + strlen(dp->d_name) + 2);
-                strcpy(nextDir, address);
+                char* nextDir = (char*) malloc(strlen(args.dirName) + strlen(dp->d_name) + 2);
+                strcpy(nextDir, args.dirName);
                 strcat(nextDir, dp->d_name);
                 strcat(nextDir, "/");
 
@@ -454,12 +459,13 @@ void* directory_handler(void* direct)
 
                 tptr = appendThread(tptr);
                 if (dirHead == NULL) dirHead = tptr;
-                pthread_create(&(tptr->threadID), NULL, directory_handler, nextDir);
+                DirHandleArgs args1 = {args.lock, nextDir, args.filesHead};
+                pthread_create(&(tptr->threadID), NULL, directory_handler, &args1);
             }
             else // or just else?
             {
-                char* nextFile = (char*) malloc(strlen(address) + strlen(dp->d_name) + 1);
-                strcpy(nextFile, address);
+                char* nextFile = (char*) malloc(strlen(args.dirName) + strlen(dp->d_name) + 1);
+                strcpy(nextFile, args.dirName);
                 strcat(nextFile, dp->d_name);
 
                 printf("Opening file %s\n", nextFile);
@@ -471,9 +477,9 @@ void* directory_handler(void* direct)
                     continue;
                 }
 
-                pthread_mutex_lock(&fileListLock);
-                Files* newFile = appendFile(fp, nextFile);
-                pthread_mutex_unlock(&fileListLock);
+                pthread_mutex_lock(args.lock);
+                Files* newFile = appendFile(fp, nextFile, args.filesHead);
+                pthread_mutex_unlock(args.lock);
 
                 tptr = appendThread(tptr);
                 if (dirHead == NULL) dirHead = tptr;
@@ -489,7 +495,7 @@ void* directory_handler(void* direct)
             ttj = ttj->next;
         }
         freeThreads(dirHead);
-        free(address);
+        free(args.dirName);
         closedir(dir);
 
         pthread_exit(NULL);
@@ -511,18 +517,19 @@ int main (int argc, char** argv) {
     if (dirlen != strlen(argv[1])) strcat(dir, "/");
     printf("%s\n", dir);
 
+    pthread_mutex_t fileListLock;
     pthread_mutex_init(&fileListLock, NULL);
     pthread_t init;
 
-    filesHead = (Files*) malloc(sizeof(Files));
+    Files* filesHead = (Files*) malloc(sizeof(Files));
     filesHead->tokens = NULL;
     filesHead->next = NULL;
     filesHead->fileName = NULL;
     filesHead->fp = NULL;
     filesHead->tokenCount = 0;
-    lastFile = filesHead;
 
-    pthread_create(&init, NULL, directory_handler, dir);
+    DirHandleArgs args = {&fileListLock, dir, filesHead};
+    pthread_create(&init, NULL, directory_handler, &args);
 
     pthread_join(init, NULL);
 
