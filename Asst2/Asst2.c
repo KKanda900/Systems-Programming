@@ -126,13 +126,9 @@ Threads* appendThread (Threads* last)
     {
         newNode = (Threads*) malloc(sizeof(Threads));
     }
-    else if (last->next != NULL)
-    {
-        printf("Not pointing to the end of list, check the code\n");
-        return NULL;
-    }
     else
     {
+        while (last->next != NULL) last = last->next;
         last->next = (Threads*) malloc(sizeof(Threads));
         newNode = last->next;
     }
@@ -455,8 +451,6 @@ void* directory_handler(void* direct)
                 strcat(nextDir, dp->d_name);
                 strcat(nextDir, "/");
 
-                printf("Opening dir %s\n", nextDir);
-
                 tptr = appendThread(tptr);
                 if (dirHead == NULL) dirHead = tptr;
                 DirHandleArgs* newargs = (DirHandleArgs*) malloc(sizeof(DirHandleArgs));
@@ -471,11 +465,10 @@ void* directory_handler(void* direct)
                 strcpy(nextFile, args->dirName);
                 strcat(nextFile, dp->d_name);
 
-                printf("Opening file %s\n", nextFile);
                 FILE* fp = fopen(nextFile, "r");
                 if (fp == NULL)
                 {
-                    printf("Cannot open %s (%d)\n", nextFile, errno);
+                    perror(nextFile);
                     free(nextFile);
                     continue;
                 }
@@ -519,7 +512,6 @@ int main (int argc, char** argv) {
     char* dir = (char*) malloc(dirlen + 1); // +1 for '\0'
     strcpy(dir, argv[1]);
     if (dirlen != strlen(argv[1])) strcat(dir, "/");
-    printf("%s\n", dir);
 
     pthread_mutex_t fileListLock;
     pthread_mutex_init(&fileListLock, NULL);
