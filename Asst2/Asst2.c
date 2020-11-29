@@ -182,7 +182,7 @@ char* getToken (FILE* f)
 
     int c = fgetc(f);
     char ch = '\0';
-    while (c != EOF && !isspace(c))
+    while (c != EOF && (!isspace(c) || validCount == 0))
     {
         ch = (char)c;
         if (isalpha(ch) || ch == '-')
@@ -223,8 +223,13 @@ void insertToken (Files* f, char* word)
             prev = ptr;
             ptr = ptr->next;
         }
-        if (prev == NULL) // new front
+        if (prev == NULL) // front
         {
+            if (strcmp(word, ptr->word) == 0) // token existed
+            {
+                ptr->freq++;
+                return;
+            }
             f->tokens = (Tokens*) malloc(sizeof(Tokens));
             f->tokens->next = ptr;
             ptr = f->tokens;
@@ -443,7 +448,7 @@ void* directory_handler(void* direct)
                 char* nextDir = (char*) malloc(strlen(address) + strlen(dp->d_name) + 2);
                 strcpy(nextDir, address);
                 strcat(nextDir, dp->d_name);
-                strcat(nextDir, "/\0");
+                strcat(nextDir, "/");
 
                 printf("Opening dir %s\n", nextDir);
 
@@ -503,7 +508,7 @@ int main (int argc, char** argv) {
 
     char* dir = (char*) malloc(dirlen + 1); // +1 for '\0'
     strcpy(dir, argv[1]);
-    if (dirlen != strlen(argv[1])) strcat(dir, "/\0");
+    if (dirlen != strlen(argv[1])) strcat(dir, "/");
     printf("%s\n", dir);
 
     pthread_mutex_init(&fileListLock, NULL);
