@@ -52,8 +52,8 @@ void insertToken (Files* f, char* word);
 
 Files* mergesortFiles(Files* head);
 Files* mergeFiles(Files* left, Files* right);
-
 void getProb(Files* head);
+
 Tokens* computeMean(Files* f1, Files* f2);
 double computeKLD(Tokens* mean, Tokens* t);
 
@@ -450,7 +450,6 @@ void* directory_handler(void* direct)
                 tptr = appendThread(tptr);
                 if (dirHead == NULL) dirHead = tptr;
                 pthread_create(&(tptr->threadID), NULL, directory_handler, nextDir);
-                free(nextDir);
             }
             else // or just else?
             {
