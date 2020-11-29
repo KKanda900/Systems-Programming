@@ -1,11 +1,8 @@
-TARGET = test
 CC     = gcc
-CFLAGS = -pthread 
+CFLAGS = -pthread -g -Wall -fsanitize=address 
 
-$(TARGET): $(TARGET).c
-	$(CC) $(CFLAGS) $^ -o $@
+Asst2: Asst2.o
+	$(CC) $(CFLAGS) Asst2.o -lm -o detector
 
 clean:
-	rm -rf $(TARGET) *.o *.a *.dylib *.dSYM
-
-
+	rm -rf $(TARGET) *.o *.a *.dylib *.dSYM detector
