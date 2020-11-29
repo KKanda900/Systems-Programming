@@ -215,8 +215,8 @@ void tokenizer (FILE* f, char* filename, Files* ptr)
     // return ptr; // for faster file insertion
 }
 
-// Merge two sorted Files lists
-Files* mergeFiles(Files* left, Files* right) // both left & right are not NULL is ensured
+// Merge two sorted Files lists. Both left & right are not NULL is ensured by caller
+Files* mergeFiles(Files* left, Files* right)
 {
     Files* ptr = NULL;
     Files* sortedHead = NULL;
@@ -262,10 +262,8 @@ Files* mergeFiles(Files* left, Files* right) // both left & right are not NULL i
 // Sorting Files list with merge sort
 Files* mergesortFiles(Files* head)
 {
-    if (head == NULL || head->next == NULL)
-    {
-        return head;
-    }
+    if (head == NULL || head->next == NULL) return head; // only 1 node in the list
+
     Files* middle = head;
     Files* end = head->next;
     while (end != NULL)
@@ -291,7 +289,7 @@ void getProb(Files* head)
         Tokens* ptr = head->tokens;
         while (ptr != NULL)
         {
-            ptr->freq = ptr->freq/(double)head->tokenCount;
+            ptr->freq = ptr->freq/head->tokenCount;
             ptr = ptr->next;
         }
         head = head->next;
@@ -303,42 +301,22 @@ Tokens* computeMean(Files* f1, Files* f2)
 {
     Tokens* t1 = f1->tokens;
     Tokens* t2 = f2->tokens;
-    if (t1 == NULL && t2 == NULL)
-    {
-        return NULL;
-    }
+    if (t1 == NULL && t2 == NULL) return NULL;
 
     Tokens* mean = (Tokens*) malloc(sizeof(Tokens));
-    mean->next = NULL;
-    if (t2 == NULL || strcmp(t1->word, t2->word) < 0) // fix this later
-    {
-        mean->word = (char*) malloc(strlen(t1->word) + 1);
-        strcpy(mean->word, t1->word);
-        mean->freq = t1->freq/2;
-        t1 = t1->next;
-    }
-    else if (t1 == NULL || strcmp(t1->word, t2->word) > 0)
-    {
-        mean->word = (char*) malloc(strlen(t2->word) + 1);
-        strcpy(mean->word, t2->word);
-        mean->freq = t2->freq/2;
-        t2 = t2->next;
-    }
-    else // strcmp(t1->word, t2->word) == 0
-    {
-        mean->word = (char*) malloc(strlen(t1->word) + 1);
-        strcpy(mean->word, t1->word);
-        mean->freq = (t1->freq + t2->freq)/2;
-        t1 = t1->next;
-        t2 = t2->next;
-    }
-
     Tokens* ptr = mean;
+    mean->word = NULL;
+    mean->next = NULL;
+
     while (t1 != NULL || t2 != NULL)
     {
-        ptr->next = (Tokens*) malloc(sizeof(Tokens*));
-        ptr = ptr->next;
-        ptr->next = NULL;
+        if (ptr->word != NULL) // not the first node
+        {
+            ptr->next = (Tokens*) malloc(sizeof(Tokens*));
+            ptr = ptr->next;
+            ptr->next = NULL;
+        }
+
         if (t2 == NULL || (t1 != NULL && strcmp(t1->word, t2->word) < 0))
         {
             ptr->word = (char*) malloc(strlen(t1->word) + 1);
@@ -386,7 +364,7 @@ int main (int argc, char** argv) {
 /*    printf("%d\n", argc);
     if (argc < 2) {
         printf("Provide a directory.\n");
-        return EXIT_SUCCESS;
+        return EXIT_FAILURE;
     }
 
     int dirnlen = (int)strlen(argv[1]);
@@ -401,9 +379,9 @@ int main (int argc, char** argv) {
 
     // scan through dir
     // found somefile.txt
-    FILE* fp1 = fopen("/Users/cjx10/Documents/214/Asst2/test1.txt", "r");
+/*    FILE* fp1 = fopen("/Users/cjx10/Documents/214/Asst2/test1.txt", "r");
     tokenizer(fp1, "./test1.txt", filesHead);
-    fclose(fp1);
+    fclose(fp1);*/
     FILE* fp2 = fopen("/Users/cjx10/Documents/214/Asst2/test0.txt", "r");
     tokenizer(fp2, "./test0.txt", filesHead);
     fclose(fp2);
@@ -415,8 +393,6 @@ int main (int argc, char** argv) {
     filesHead = mergesortFiles(filesHead);
     getProb(filesHead);
     filesToString(filesHead);
-
-    return 0;
 
     Files* f1 = filesHead;
     char* color_default = "\033[0m";
