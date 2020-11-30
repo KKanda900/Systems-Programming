@@ -689,7 +689,7 @@ int main (int argc, char** argv) {
             else if (result > 0.1) color = color_yellow;
             else color = color_red;
 
-            printf("%s%.2f%s \"%s\" and \"%s\"\n", color, result, color_default, f1->fileName, f2->fileName);
+            printf("%s%f%s \"%s\" and \"%s\"\n", color, result, color_default, f1->fileName, f2->fileName);
             f2 = f2->next;
         }
         f1 = f1->next;
