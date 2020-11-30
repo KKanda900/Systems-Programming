@@ -2,15 +2,23 @@ Test Case #1: Correctness
 
 Directory:
 ./testfiles
-    - ./lltest
+    -./lltest
         -test0.txt
+        
+            a b c d e
+
         -test1.txt
+            
+            a b c d e aa e f g aaa aaaa
+            a!243a a'nt a.ef
+
         -test2.txt
+
+            a b c d e f g h
 
 Description:
 For this test case we are testing for correctness and checking if the files are being compared properly.
-There aren't any files in the main directory so the only files that should be comparing is test0.txt, test1.txt
-and test2.txt with each other.
+There aren't any files in the main directory so the only files that should be comparing is test0.txt, test1.txt and test2.txt with each other.
 
 Results:
 0.07 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/test2.txt"
@@ -18,9 +26,7 @@ Results:
 0.09 "./testfiles/lltest/test2.txt" and "./testfiles/lltest/test1.txt"
 
 Explanation of Results:
-In this case we only had 3 files in the subdirectory which it should have compared each file with each other and we 
-see that in the results. test0.txt got compared with test2.txt then compared with test1.txt. Which left test2 and test1
-to be compared with each other. Displaying the similarity on the right hand side.
+In this case we only had 3 files in the subdirectory which it should have compared each file with each other and we see that in the results. The file with the least number of tokens test0.txt got compared with test2.txt then compared with test1.txt. Which left test2 and test1 to be compared with each other. Displaying the similarity on the start of line.
 
 Test Case #2: More Correctness 
 
@@ -38,10 +44,7 @@ Directory:
 			-hw3
 
 Description:
-For this test case it is similar to the first test cases but we want to add another test directory inorder to 
-test if the files are correctly compared if we add another layer to the main directory given. In this case it should
-test all the files in lltest directory (random, test1.txt, test2.txt) with each other and with the files in sub1 
-(1.txt, 3.txt, 4.txt and hw3)
+For this test case it is similar to the first test cases but we want to add another test directory inorder to test if the files are correctly compared if we add another layer to the main directory given. In this case it should test all the files in lltest directory (random, test1.txt, test2.txt) with each other and with the files in sub1 (1.txt, 3.txt, 4.txt and hw3)
 
 Results:
 0.15 "./testfiles/lltest/sub1/4.txt" and "./testfiles/lltest/test0.txt"
@@ -77,37 +80,7 @@ Explanation of Results:
 The expected results for this case is that each file in the sub directory and main directory would be compared with each other and only once.
 As we see that each file in the subdirectory and main directory got compared with each other only once which was the expectation.
 
-Test Case #3: Accuracy of our implemenation of JSD Analysis 
-
-Directory:
-./testfiles
-	-./directory
-		-test0.txt
-		
-			a b c d e		
-
-		-test1.txt
-			
-			a b c d e aa e f g aaa aaaa
-			a!243a a'nt a.ef
-
-		-test2.txt
-
-			a b c d e f g h
-
-Description:
-For this test case we want to test the analysis accuracy. For this test case we expect for test1.txt to be the least similar from
-test0.txt and test2.txt. Also expecting test0.txt and test1.txt to be the most similar out of the test files.
-
-Results:
-0.07 "./testfiles/directory/test0.txt" and "./testfiles/directory/test2.txt"
-0.11 "./testfiles/directory/test0.txt" and "./testfiles/directory/test1.txt"
-0.09 "./testfiles/directory/test2.txt" and "./testfiles/directory/test1.txt"
-
-Explanation of Results:
-As we see from the results 
-
-Test Case #4: Accuracy of our implemenation of JSD Analysis (Extreme Difference)
+Test Case #3: Accuracy of our implemenation of JSD Analysis (Extreme Difference)
 
 Directory:
 ./testfiles
@@ -117,9 +90,7 @@ Directory:
 		-test2.txt
 
 Description:
-For this test case we want to test the accuracy of the JSD analysis implemenation but in this test case we want to test files 
-with extreme differences. With this test case we can see how accurate the test is when all the files in the directory are 
-unrelated. test1.txt is just abcde, test2.txt is a short story and test3.txt is random gibberish.
+For this test case we want to test the accuracy of the JSD analysis implemenation but in this test case we want to test files with extreme differences. With this test case we can see how accurate the test is when all the files in the directory are unrelated. test0.txt is just "a b c d e", test1.txt is a short story and test2.txt is random gibberish.
 
 Results:
 0.30 "./testfiles/directory/test0.txt" and "./testfiles/directory/test2.txt"
@@ -127,8 +98,10 @@ Results:
 0.30 "./testfiles/directory/test2.txt" and "./testfiles/directory/test1.txt"
 
 Explanations of Results:
+We see that the random gibberish test2 does have JSD of 0.30 with the other two texts, which is the max value for completely different files (1*log_10(1/0.5)=0.301).
+JSD between test0 & test1 is slightly lower because of the token "a".
 
-Test Case #5: Accuracy of our implemenation of JSD Analysis (Extreme Similarity)
+Test Case #4: Accuracy of our implemenation of JSD Analysis (Extreme Similarity)
 
 Directory:
 ./testfiles
@@ -138,8 +111,7 @@ Directory:
 		-test2.txt
 
 Description:
-For this test we are testing the accuracy of the JSD implemenation but when the test files have extreme similarities between 
-each other. test0.txt, test1.txt and test2.txt will all contain a short story but they will have the same contents.
+For this test we are testing the accuracy of the JSD implemenation but when the test files have extreme similarities between each other. test0.txt, test1.txt and test2.txt will all contain a short story but they will have the same contents.
 
 Results:
 0.00 "./testfiles/directory/test0.txt" and "./testfiles/directory/test1.txt"
@@ -147,8 +119,9 @@ Results:
 0.00 "./testfiles/directory/test1.txt" and "./testfiles/directory/test2.txt"
 
 Explanations of Results:
+The expected JSD of 0 is indeed the result. (p*log_10(p/p)=0)
 
-Test Case #6: Large Directory Test
+Test Case #5: Large Directory Test
 
 Directory:
 ./testfiles
@@ -189,9 +162,7 @@ Directory:
 				-random2
 
 Description:
-For this test we want to test the limitation of our program so we decided to create a test directory that contains a lot 
-of various files and many subdirectories with subdirectories with in the subdirectories. The purpose of this test case is to
-test the limitation of our program to see if it can hold with a directory that is very large.
+For this test we want to test the limitation of our program so we decided to create a test directory that contains a lot of various files and many subdirectories with subdirectories with in the subdirectories. The purpose of this test case is to test the limitation of our program to see if it can hold with a directory that is very large.
 
 Results:
 0.30 "./testfiles/someother/a.txt" and "./testfiles/someother/z.txt"
@@ -600,4 +571,3 @@ Results:
 0.11 "./testfiles/someother/sub1/sub2/2.txt" and "./testfiles/someother/sub1/sub2/4.txt"
 0.11 "./testfiles/someother/sub1/sub2/2.txt" and "./testfiles/someother/sub1/4.txt"
 0.00 "./testfiles/someother/sub1/sub2/4.txt" and "./testfiles/someother/sub1/4.txt"
-
