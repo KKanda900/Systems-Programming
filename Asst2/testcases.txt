@@ -1,0 +1,603 @@
+Test Case #1: Correctness
+
+Directory:
+./testfiles
+    - ./lltest
+        -test0.txt
+        -test1.txt
+        -test2.txt
+
+Description:
+For this test case we are testing for correctness and checking if the files are being compared properly.
+There aren't any files in the main directory so the only files that should be comparing is test0.txt, test1.txt
+and test2.txt with each other.
+
+Results:
+0.07 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/test2.txt"
+0.11 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/test1.txt"
+0.09 "./testfiles/lltest/test2.txt" and "./testfiles/lltest/test1.txt"
+
+Explanation of Results:
+In this case we only had 3 files in the subdirectory which it should have compared each file with each other and we 
+see that in the results. test0.txt got compared with test2.txt then compared with test1.txt. Which left test2 and test1
+to be compared with each other. Displaying the similarity on the right hand side.
+
+Test Case #2: More Correctness 
+
+Directory:
+./testfiles
+	- ./lltest
+		-random
+		-test0.txt
+		-test1.txt
+		-test2.txt
+		-./sub1
+			-1.txt
+			-3.txt
+			-4.txt
+			-hw3
+
+Description:
+For this test case it is similar to the first test cases but we want to add another test directory inorder to 
+test if the files are correctly compared if we add another layer to the main directory given. In this case it should
+test all the files in lltest directory (random, test1.txt, test2.txt) with each other and with the files in sub1 
+(1.txt, 3.txt, 4.txt and hw3)
+
+Results:
+0.15 "./testfiles/lltest/sub1/4.txt" and "./testfiles/lltest/test0.txt"
+0.15 "./testfiles/lltest/sub1/4.txt" and "./testfiles/lltest/test2.txt"
+0.15 "./testfiles/lltest/sub1/4.txt" and "./testfiles/lltest/test1.txt"
+0.15 "./testfiles/lltest/sub1/4.txt" and "./testfiles/lltest/sub1/hw3"
+0.15 "./testfiles/lltest/sub1/4.txt" and "./testfiles/lltest/random "
+0.15 "./testfiles/lltest/sub1/4.txt" and "./testfiles/lltest/sub1/1.txt"
+0.15 "./testfiles/lltest/sub1/4.txt" and "./testfiles/lltest/sub1/3.txt"
+0.07 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/test2.txt"
+0.11 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/test1.txt"
+0.25 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/sub1/hw3"
+0.23 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/random "
+0.29 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/sub1/1.txt"
+0.29 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/sub1/3.txt"
+0.09 "./testfiles/lltest/test2.txt" and "./testfiles/lltest/test1.txt"
+0.22 "./testfiles/lltest/test2.txt" and "./testfiles/lltest/sub1/hw3"
+0.20 "./testfiles/lltest/test2.txt" and "./testfiles/lltest/random "
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/lltest/sub1/1.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/lltest/sub1/3.txt"
+0.26 "./testfiles/lltest/test1.txt" and "./testfiles/lltest/sub1/hw3"
+0.24 "./testfiles/lltest/test1.txt" and "./testfiles/lltest/random "
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/lltest/sub1/1.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/lltest/sub1/3.txt"
+0.20 "./testfiles/lltest/sub1/hw3" and "./testfiles/lltest/random "
+0.30 "./testfiles/lltest/sub1/hw3" and "./testfiles/lltest/sub1/1.txt"
+0.30 "./testfiles/lltest/sub1/hw3" and "./testfiles/lltest/sub1/3.txt"
+0.28 "./testfiles/lltest/random " and "./testfiles/lltest/sub1/1.txt"
+0.29 "./testfiles/lltest/random " and "./testfiles/lltest/sub1/3.txt"
+0.19 "./testfiles/lltest/sub1/1.txt" and "./testfiles/lltest/sub1/3.txt"
+
+Explanation of Results: 
+The expected results for this case is that each file in the sub directory and main directory would be compared with each other and only once.
+As we see that each file in the subdirectory and main directory got compared with each other only once which was the expectation.
+
+Test Case #3: Accuracy of our implemenation of JSD Analysis 
+
+Directory:
+./testfiles
+	-./directory
+		-test0.txt
+		
+			a b c d e		
+
+		-test1.txt
+			
+			a b c d e aa e f g aaa aaaa
+			a!243a a'nt a.ef
+
+		-test2.txt
+
+			a b c d e f g h
+
+Description:
+For this test case we want to test the analysis accuracy. For this test case we expect for test1.txt to be the least similar from
+test0.txt and test2.txt. Also expecting test0.txt and test1.txt to be the most similar out of the test files.
+
+Results:
+0.07 "./testfiles/directory/test0.txt" and "./testfiles/directory/test2.txt"
+0.11 "./testfiles/directory/test0.txt" and "./testfiles/directory/test1.txt"
+0.09 "./testfiles/directory/test2.txt" and "./testfiles/directory/test1.txt"
+
+Explanation of Results:
+As we see from the results 
+
+Test Case #4: Accuracy of our implemenation of JSD Analysis (Extreme Difference)
+
+Directory:
+./testfiles
+	-./directory
+		-test0.txt
+		-test1.txt
+		-test2.txt
+
+Description:
+For this test case we want to test the accuracy of the JSD analysis implemenation but in this test case we want to test files 
+with extreme differences. With this test case we can see how accurate the test is when all the files in the directory are 
+unrelated. test1.txt is just abcde, test2.txt is a short story and test3.txt is random gibberish.
+
+Results:
+0.30 "./testfiles/directory/test0.txt" and "./testfiles/directory/test2.txt"
+0.28 "./testfiles/directory/test0.txt" and "./testfiles/directory/test1.txt"
+0.30 "./testfiles/directory/test2.txt" and "./testfiles/directory/test1.txt"
+
+Explanations of Results:
+
+Test Case #5: Accuracy of our implemenation of JSD Analysis (Extreme Similarity)
+
+Directory:
+./testfiles
+	-./directory
+		-test0.txt
+		-test1.txt
+		-test2.txt
+
+Description:
+For this test we are testing the accuracy of the JSD implemenation but when the test files have extreme similarities between 
+each other. test0.txt, test1.txt and test2.txt will all contain a short story but they will have the same contents.
+
+Results:
+0.00 "./testfiles/directory/test0.txt" and "./testfiles/directory/test1.txt"
+0.00 "./testfiles/directory/test0.txt" and "./testfiles/directory/test2.txt"
+0.00 "./testfiles/directory/test1.txt" and "./testfiles/directory/test2.txt"
+
+Explanations of Results:
+
+Test Case #6: Large Directory Test
+
+Directory:
+./testfiles
+	-./directory
+		-test0.txt
+		-test1.txt
+		-test2.txt
+	-./lltest
+		-test0.txt
+		-test1.txt
+		-test2.txt
+	-./nonsense
+		-nonsense0
+		-nonsense1
+		-nonsense2
+		-nonsense3
+		-nonsense4
+	-./someother
+		-1.txt
+		-2.txt
+		-3.txt
+		-a.txt
+		-ex1
+		-example.txt
+		-examplecopy.txt
+		-z.txt
+		-./sub1
+			-1.txt
+			-2.txt
+			-3.txt
+			-4.txt
+			-sub2
+				-1.txt
+				-2.txt
+				-3.txt
+				-4.txt
+				-random
+				-random2
+
+Description:
+For this test we want to test the limitation of our program so we decided to create a test directory that contains a lot 
+of various files and many subdirectories with subdirectories with in the subdirectories. The purpose of this test case is to
+test the limitation of our program to see if it can hold with a directory that is very large.
+
+Results:
+0.30 "./testfiles/someother/a.txt" and "./testfiles/someother/z.txt"
+0.18 "./testfiles/someother/a.txt" and "./testfiles/lltest/test0.txt"
+0.22 "./testfiles/someother/a.txt" and "./testfiles/lltest/test2.txt"
+0.24 "./testfiles/someother/a.txt" and "./testfiles/lltest/test1.txt"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/nonsense/nonsense2"
+0.27 "./testfiles/someother/a.txt" and "./testfiles/nonsense/nonsense4"
+0.24 "./testfiles/someother/a.txt" and "./testfiles/nonsense/nonsense0"
+0.24 "./testfiles/someother/a.txt" and "./testfiles/nonsense/nonsense3"
+0.27 "./testfiles/someother/a.txt" and "./testfiles/nonsense/nonsense1"
+0.30 "./testfiles/someother/a.txt" and "./testfiles/someother/ex1"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/someother/sub1/sub2/random "
+0.28 "./testfiles/someother/a.txt" and "./testfiles/someother/sub1/sub2/random2"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/someother/sub1/1.txt"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/someother/sub1/sub2/1.txt"
+0.29 "./testfiles/someother/a.txt" and "./testfiles/someother/sub1/3.txt"
+0.29 "./testfiles/someother/a.txt" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/someother/a.txt" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/someother/a.txt" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/someother/a.txt" and "./testfiles/someother/3.txt"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/directory/test0.txt"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/directory/test1.txt"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/someother/example.txt"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/someother/examplecopy.txt"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/directory/test2.txt"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/someother/sub1/2.txt"
+0.28 "./testfiles/someother/a.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.27 "./testfiles/someother/a.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.27 "./testfiles/someother/a.txt" and "./testfiles/someother/sub1/4.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/lltest/test0.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/lltest/test2.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/lltest/test1.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/nonsense/nonsense2"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/nonsense/nonsense4"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/nonsense/nonsense0"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/nonsense/nonsense3"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/nonsense/nonsense1"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/ex1"
+0.29 "./testfiles/someother/z.txt" and "./testfiles/someother/sub1/sub2/random "
+0.29 "./testfiles/someother/z.txt" and "./testfiles/someother/sub1/sub2/random2"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/sub1/1.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/sub1/sub2/1.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/sub1/3.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/3.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/directory/test0.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/directory/test1.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/example.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/examplecopy.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/directory/test2.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/sub1/2.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.30 "./testfiles/someother/z.txt" and "./testfiles/someother/sub1/4.txt"
+0.07 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/test2.txt"
+0.11 "./testfiles/lltest/test0.txt" and "./testfiles/lltest/test1.txt"
+0.29 "./testfiles/lltest/test0.txt" and "./testfiles/nonsense/nonsense2"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/nonsense/nonsense4"
+0.26 "./testfiles/lltest/test0.txt" and "./testfiles/nonsense/nonsense0"
+0.27 "./testfiles/lltest/test0.txt" and "./testfiles/nonsense/nonsense3"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/nonsense/nonsense1"
+0.29 "./testfiles/lltest/test0.txt" and "./testfiles/someother/ex1"
+0.23 "./testfiles/lltest/test0.txt" and "./testfiles/someother/sub1/sub2/random "
+0.24 "./testfiles/lltest/test0.txt" and "./testfiles/someother/sub1/sub2/random2"
+0.29 "./testfiles/lltest/test0.txt" and "./testfiles/someother/sub1/1.txt"
+0.29 "./testfiles/lltest/test0.txt" and "./testfiles/someother/sub1/sub2/1.txt"
+0.29 "./testfiles/lltest/test0.txt" and "./testfiles/someother/sub1/3.txt"
+0.29 "./testfiles/lltest/test0.txt" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/lltest/test0.txt" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/lltest/test0.txt" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/lltest/test0.txt" and "./testfiles/someother/3.txt"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/directory/test0.txt"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/directory/test1.txt"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/someother/example.txt"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/someother/examplecopy.txt"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/directory/test2.txt"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/someother/sub1/2.txt"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.28 "./testfiles/lltest/test0.txt" and "./testfiles/someother/sub1/4.txt"
+0.09 "./testfiles/lltest/test2.txt" and "./testfiles/lltest/test1.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/nonsense/nonsense2"
+0.28 "./testfiles/lltest/test2.txt" and "./testfiles/nonsense/nonsense4"
+0.27 "./testfiles/lltest/test2.txt" and "./testfiles/nonsense/nonsense0"
+0.27 "./testfiles/lltest/test2.txt" and "./testfiles/nonsense/nonsense3"
+0.28 "./testfiles/lltest/test2.txt" and "./testfiles/nonsense/nonsense1"
+0.24 "./testfiles/lltest/test2.txt" and "./testfiles/someother/ex1"
+0.20 "./testfiles/lltest/test2.txt" and "./testfiles/someother/sub1/sub2/random "
+0.21 "./testfiles/lltest/test2.txt" and "./testfiles/someother/sub1/sub2/random2"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/someother/sub1/1.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/someother/sub1/sub2/1.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/someother/sub1/3.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/lltest/test2.txt" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/lltest/test2.txt" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/lltest/test2.txt" and "./testfiles/someother/3.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/directory/test0.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/directory/test1.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/someother/example.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/someother/examplecopy.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/directory/test2.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/someother/sub1/2.txt"
+0.29 "./testfiles/lltest/test2.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.28 "./testfiles/lltest/test2.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.28 "./testfiles/lltest/test2.txt" and "./testfiles/someother/sub1/4.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/nonsense/nonsense2"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/nonsense/nonsense4"
+0.28 "./testfiles/lltest/test1.txt" and "./testfiles/nonsense/nonsense0"
+0.28 "./testfiles/lltest/test1.txt" and "./testfiles/nonsense/nonsense3"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/nonsense/nonsense1"
+0.28 "./testfiles/lltest/test1.txt" and "./testfiles/someother/ex1"
+0.24 "./testfiles/lltest/test1.txt" and "./testfiles/someother/sub1/sub2/random "
+0.24 "./testfiles/lltest/test1.txt" and "./testfiles/someother/sub1/sub2/random2"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/someother/sub1/1.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/someother/sub1/sub2/1.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/someother/sub1/3.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/lltest/test1.txt" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/lltest/test1.txt" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/lltest/test1.txt" and "./testfiles/someother/3.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/directory/test0.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/directory/test1.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/someother/example.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/someother/examplecopy.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/directory/test2.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/someother/sub1/2.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.29 "./testfiles/lltest/test1.txt" and "./testfiles/someother/sub1/4.txt"
+0.24 "./testfiles/nonsense/nonsense2" and "./testfiles/nonsense/nonsense4"
+0.27 "./testfiles/nonsense/nonsense2" and "./testfiles/nonsense/nonsense0"
+0.21 "./testfiles/nonsense/nonsense2" and "./testfiles/nonsense/nonsense3"
+0.23 "./testfiles/nonsense/nonsense2" and "./testfiles/nonsense/nonsense1"
+0.30 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/ex1"
+0.29 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/sub1/sub2/random "
+0.29 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/sub1/sub2/random2"
+0.25 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/sub1/1.txt"
+0.25 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/sub1/sub2/1.txt"
+0.24 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/sub1/3.txt"
+0.24 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/3.txt"
+0.23 "./testfiles/nonsense/nonsense2" and "./testfiles/directory/test0.txt"
+0.23 "./testfiles/nonsense/nonsense2" and "./testfiles/directory/test1.txt"
+0.23 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/example.txt"
+0.23 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/examplecopy.txt"
+0.23 "./testfiles/nonsense/nonsense2" and "./testfiles/directory/test2.txt"
+0.23 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/sub1/2.txt"
+0.23 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/sub1/sub2/2.txt"
+0.23 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/sub1/sub2/4.txt"
+0.23 "./testfiles/nonsense/nonsense2" and "./testfiles/someother/sub1/4.txt"
+0.23 "./testfiles/nonsense/nonsense4" and "./testfiles/nonsense/nonsense0"
+0.19 "./testfiles/nonsense/nonsense4" and "./testfiles/nonsense/nonsense3"
+0.22 "./testfiles/nonsense/nonsense4" and "./testfiles/nonsense/nonsense1"
+0.30 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/ex1"
+0.27 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/sub1/sub2/random "
+0.27 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/sub1/sub2/random2"
+0.24 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/sub1/1.txt"
+0.24 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/sub1/sub2/1.txt"
+0.22 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/sub1/3.txt"
+0.22 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/3.txt"
+0.22 "./testfiles/nonsense/nonsense4" and "./testfiles/directory/test0.txt"
+0.22 "./testfiles/nonsense/nonsense4" and "./testfiles/directory/test1.txt"
+0.22 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/example.txt"
+0.22 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/examplecopy.txt"
+0.23 "./testfiles/nonsense/nonsense4" and "./testfiles/directory/test2.txt"
+0.20 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/sub1/2.txt"
+0.20 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/sub1/sub2/2.txt"
+0.21 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/sub1/sub2/4.txt"
+0.21 "./testfiles/nonsense/nonsense4" and "./testfiles/someother/sub1/4.txt"
+0.21 "./testfiles/nonsense/nonsense0" and "./testfiles/nonsense/nonsense3"
+0.23 "./testfiles/nonsense/nonsense0" and "./testfiles/nonsense/nonsense1"
+0.30 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/ex1"
+0.29 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/sub1/sub2/random "
+0.28 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/sub1/sub2/random2"
+0.23 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/sub1/1.txt"
+0.23 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/sub1/sub2/1.txt"
+0.23 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/sub1/3.txt"
+0.23 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/3.txt"
+0.21 "./testfiles/nonsense/nonsense0" and "./testfiles/directory/test0.txt"
+0.21 "./testfiles/nonsense/nonsense0" and "./testfiles/directory/test1.txt"
+0.21 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/example.txt"
+0.21 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/examplecopy.txt"
+0.22 "./testfiles/nonsense/nonsense0" and "./testfiles/directory/test2.txt"
+0.22 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/sub1/2.txt"
+0.22 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/sub1/sub2/2.txt"
+0.22 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/sub1/sub2/4.txt"
+0.22 "./testfiles/nonsense/nonsense0" and "./testfiles/someother/sub1/4.txt"
+0.18 "./testfiles/nonsense/nonsense3" and "./testfiles/nonsense/nonsense1"
+0.30 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/ex1"
+0.26 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/sub1/sub2/random "
+0.26 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/sub1/sub2/random2"
+0.23 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/sub1/1.txt"
+0.23 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/sub1/sub2/1.txt"
+0.22 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/sub1/3.txt"
+0.22 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/3.txt"
+0.23 "./testfiles/nonsense/nonsense3" and "./testfiles/directory/test0.txt"
+0.23 "./testfiles/nonsense/nonsense3" and "./testfiles/directory/test1.txt"
+0.23 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/example.txt"
+0.23 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/examplecopy.txt"
+0.23 "./testfiles/nonsense/nonsense3" and "./testfiles/directory/test2.txt"
+0.20 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/sub1/2.txt"
+0.20 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/sub1/sub2/2.txt"
+0.21 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/sub1/sub2/4.txt"
+0.21 "./testfiles/nonsense/nonsense3" and "./testfiles/someother/sub1/4.txt"
+0.30 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/ex1"
+0.28 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/sub1/sub2/random "
+0.28 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/sub1/sub2/random2"
+0.22 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/sub1/1.txt"
+0.22 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/sub1/sub2/1.txt"
+0.21 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/sub1/3.txt"
+0.21 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/3.txt"
+0.20 "./testfiles/nonsense/nonsense1" and "./testfiles/directory/test0.txt"
+0.20 "./testfiles/nonsense/nonsense1" and "./testfiles/directory/test1.txt"
+0.20 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/example.txt"
+0.20 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/examplecopy.txt"
+0.21 "./testfiles/nonsense/nonsense1" and "./testfiles/directory/test2.txt"
+0.20 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/sub1/2.txt"
+0.20 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/sub1/sub2/2.txt"
+0.20 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/sub1/sub2/4.txt"
+0.20 "./testfiles/nonsense/nonsense1" and "./testfiles/someother/sub1/4.txt"
+0.20 "./testfiles/someother/ex1" and "./testfiles/someother/sub1/sub2/random "
+0.21 "./testfiles/someother/ex1" and "./testfiles/someother/sub1/sub2/random2"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/sub1/1.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/sub1/sub2/1.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/sub1/3.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/3.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/directory/test0.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/directory/test1.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/example.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/examplecopy.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/directory/test2.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/sub1/2.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/sub1/sub2/2.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/sub1/sub2/4.txt"
+0.30 "./testfiles/someother/ex1" and "./testfiles/someother/sub1/4.txt"
+0.06 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/sub1/sub2/random2"
+0.28 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/sub1/1.txt"
+0.28 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/sub1/sub2/1.txt"
+0.29 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/sub1/3.txt"
+0.29 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/1.txt"
+0.30 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/2.txt"
+0.30 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/3.txt"
+0.29 "./testfiles/someother/sub1/sub2/random " and "./testfiles/directory/test0.txt"
+0.29 "./testfiles/someother/sub1/sub2/random " and "./testfiles/directory/test1.txt"
+0.29 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/example.txt"
+0.29 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/examplecopy.txt"
+0.29 "./testfiles/someother/sub1/sub2/random " and "./testfiles/directory/test2.txt"
+0.28 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/sub1/2.txt"
+0.28 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/sub1/sub2/2.txt"
+0.28 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/sub1/sub2/4.txt"
+0.28 "./testfiles/someother/sub1/sub2/random " and "./testfiles/someother/sub1/4.txt"
+0.28 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/sub1/1.txt"
+0.28 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/sub1/sub2/1.txt"
+0.29 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/sub1/3.txt"
+0.29 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/3.txt"
+0.29 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/directory/test0.txt"
+0.29 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/directory/test1.txt"
+0.29 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/example.txt"
+0.29 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/examplecopy.txt"
+0.29 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/directory/test2.txt"
+0.28 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/sub1/2.txt"
+0.28 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/sub1/sub2/2.txt"
+0.27 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/sub1/sub2/4.txt"
+0.27 "./testfiles/someother/sub1/sub2/random2" and "./testfiles/someother/sub1/4.txt"
+0.00 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/sub1/sub2/1.txt"
+0.19 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/sub1/3.txt"
+0.19 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/3.txt"
+0.18 "./testfiles/someother/sub1/1.txt" and "./testfiles/directory/test0.txt"
+0.18 "./testfiles/someother/sub1/1.txt" and "./testfiles/directory/test1.txt"
+0.18 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/example.txt"
+0.18 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/examplecopy.txt"
+0.19 "./testfiles/someother/sub1/1.txt" and "./testfiles/directory/test2.txt"
+0.16 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/sub1/2.txt"
+0.16 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.17 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.17 "./testfiles/someother/sub1/1.txt" and "./testfiles/someother/sub1/4.txt"
+0.19 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/sub1/3.txt"
+0.19 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/3.txt"
+0.18 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/directory/test0.txt"
+0.18 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/directory/test1.txt"
+0.18 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/example.txt"
+0.18 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/examplecopy.txt"
+0.19 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/directory/test2.txt"
+0.16 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/sub1/2.txt"
+0.16 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.17 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.17 "./testfiles/someother/sub1/sub2/1.txt" and "./testfiles/someother/sub1/4.txt"
+0.00 "./testfiles/someother/sub1/3.txt" and "./testfiles/someother/sub1/sub2/3.txt"
+0.30 "./testfiles/someother/sub1/3.txt" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/someother/sub1/3.txt" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/someother/sub1/3.txt" and "./testfiles/someother/3.txt"
+0.15 "./testfiles/someother/sub1/3.txt" and "./testfiles/directory/test0.txt"
+0.15 "./testfiles/someother/sub1/3.txt" and "./testfiles/directory/test1.txt"
+0.15 "./testfiles/someother/sub1/3.txt" and "./testfiles/someother/example.txt"
+0.15 "./testfiles/someother/sub1/3.txt" and "./testfiles/someother/examplecopy.txt"
+0.16 "./testfiles/someother/sub1/3.txt" and "./testfiles/directory/test2.txt"
+0.15 "./testfiles/someother/sub1/3.txt" and "./testfiles/someother/sub1/2.txt"
+0.15 "./testfiles/someother/sub1/3.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.16 "./testfiles/someother/sub1/3.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.16 "./testfiles/someother/sub1/3.txt" and "./testfiles/someother/sub1/4.txt"
+0.30 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/someother/1.txt"
+0.30 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/someother/2.txt"
+0.30 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/someother/3.txt"
+0.15 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/directory/test0.txt"
+0.15 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/directory/test1.txt"
+0.15 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/someother/example.txt"
+0.15 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/someother/examplecopy.txt"
+0.16 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/directory/test2.txt"
+0.15 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/someother/sub1/2.txt"
+0.15 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.16 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.16 "./testfiles/someother/sub1/sub2/3.txt" and "./testfiles/someother/sub1/4.txt"
+0.00 "./testfiles/someother/1.txt" and "./testfiles/someother/2.txt"
+0.00 "./testfiles/someother/1.txt" and "./testfiles/someother/3.txt"
+0.30 "./testfiles/someother/1.txt" and "./testfiles/directory/test0.txt"
+0.30 "./testfiles/someother/1.txt" and "./testfiles/directory/test1.txt"
+0.30 "./testfiles/someother/1.txt" and "./testfiles/someother/example.txt"
+0.30 "./testfiles/someother/1.txt" and "./testfiles/someother/examplecopy.txt"
+0.30 "./testfiles/someother/1.txt" and "./testfiles/directory/test2.txt"
+0.30 "./testfiles/someother/1.txt" and "./testfiles/someother/sub1/2.txt"
+0.30 "./testfiles/someother/1.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.30 "./testfiles/someother/1.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.30 "./testfiles/someother/1.txt" and "./testfiles/someother/sub1/4.txt"
+0.00 "./testfiles/someother/2.txt" and "./testfiles/someother/3.txt"
+0.30 "./testfiles/someother/2.txt" and "./testfiles/directory/test0.txt"
+0.30 "./testfiles/someother/2.txt" and "./testfiles/directory/test1.txt"
+0.30 "./testfiles/someother/2.txt" and "./testfiles/someother/example.txt"
+0.30 "./testfiles/someother/2.txt" and "./testfiles/someother/examplecopy.txt"
+0.30 "./testfiles/someother/2.txt" and "./testfiles/directory/test2.txt"
+0.30 "./testfiles/someother/2.txt" and "./testfiles/someother/sub1/2.txt"
+0.30 "./testfiles/someother/2.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.30 "./testfiles/someother/2.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.30 "./testfiles/someother/2.txt" and "./testfiles/someother/sub1/4.txt"
+0.30 "./testfiles/someother/3.txt" and "./testfiles/directory/test0.txt"
+0.30 "./testfiles/someother/3.txt" and "./testfiles/directory/test1.txt"
+0.30 "./testfiles/someother/3.txt" and "./testfiles/someother/example.txt"
+0.30 "./testfiles/someother/3.txt" and "./testfiles/someother/examplecopy.txt"
+0.30 "./testfiles/someother/3.txt" and "./testfiles/directory/test2.txt"
+0.30 "./testfiles/someother/3.txt" and "./testfiles/someother/sub1/2.txt"
+0.30 "./testfiles/someother/3.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.30 "./testfiles/someother/3.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.30 "./testfiles/someother/3.txt" and "./testfiles/someother/sub1/4.txt"
+0.00 "./testfiles/directory/test0.txt" and "./testfiles/directory/test1.txt"
+0.00 "./testfiles/directory/test0.txt" and "./testfiles/someother/example.txt"
+0.00 "./testfiles/directory/test0.txt" and "./testfiles/someother/examplecopy.txt"
+0.00 "./testfiles/directory/test0.txt" and "./testfiles/directory/test2.txt"
+0.14 "./testfiles/directory/test0.txt" and "./testfiles/someother/sub1/2.txt"
+0.14 "./testfiles/directory/test0.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.12 "./testfiles/directory/test0.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.12 "./testfiles/directory/test0.txt" and "./testfiles/someother/sub1/4.txt"
+0.00 "./testfiles/directory/test1.txt" and "./testfiles/someother/example.txt"
+0.00 "./testfiles/directory/test1.txt" and "./testfiles/someother/examplecopy.txt"
+0.00 "./testfiles/directory/test1.txt" and "./testfiles/directory/test2.txt"
+0.14 "./testfiles/directory/test1.txt" and "./testfiles/someother/sub1/2.txt"
+0.14 "./testfiles/directory/test1.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.12 "./testfiles/directory/test1.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.12 "./testfiles/directory/test1.txt" and "./testfiles/someother/sub1/4.txt"
+0.00 "./testfiles/someother/example.txt" and "./testfiles/someother/examplecopy.txt"
+0.00 "./testfiles/someother/example.txt" and "./testfiles/directory/test2.txt"
+0.14 "./testfiles/someother/example.txt" and "./testfiles/someother/sub1/2.txt"
+0.14 "./testfiles/someother/example.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.12 "./testfiles/someother/example.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.12 "./testfiles/someother/example.txt" and "./testfiles/someother/sub1/4.txt"
+0.00 "./testfiles/someother/examplecopy.txt" and "./testfiles/directory/test2.txt"
+0.14 "./testfiles/someother/examplecopy.txt" and "./testfiles/someother/sub1/2.txt"
+0.14 "./testfiles/someother/examplecopy.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.12 "./testfiles/someother/examplecopy.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.12 "./testfiles/someother/examplecopy.txt" and "./testfiles/someother/sub1/4.txt"
+0.15 "./testfiles/directory/test2.txt" and "./testfiles/someother/sub1/2.txt"
+0.15 "./testfiles/directory/test2.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.12 "./testfiles/directory/test2.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.12 "./testfiles/directory/test2.txt" and "./testfiles/someother/sub1/4.txt"
+0.00 "./testfiles/someother/sub1/2.txt" and "./testfiles/someother/sub1/sub2/2.txt"
+0.11 "./testfiles/someother/sub1/2.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.11 "./testfiles/someother/sub1/2.txt" and "./testfiles/someother/sub1/4.txt"
+0.11 "./testfiles/someother/sub1/sub2/2.txt" and "./testfiles/someother/sub1/sub2/4.txt"
+0.11 "./testfiles/someother/sub1/sub2/2.txt" and "./testfiles/someother/sub1/4.txt"
+0.00 "./testfiles/someother/sub1/sub2/4.txt" and "./testfiles/someother/sub1/4.txt"
+
