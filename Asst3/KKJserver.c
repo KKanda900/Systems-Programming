@@ -17,7 +17,7 @@ struct connection
 };
 
 int kkjserver(char *port);
-void *echo(struct connection *arg);
+void *echo(void *arg);
 
 int main(int argc, char **argv)
 {
@@ -59,7 +59,8 @@ int kkjserver(char *portnum)
             continue;
         }
 
-        if ((bind(sfd, addr->ai_addr, addr->ai_addrlen) == 0) && (listen(sfd, BACKLOG) == 0))
+        if ((bind(sfd, addr->ai_addr, addr->ai_addrlen) == 0) &&
+            (listen(sfd, BACKLOG) == 0))
         {
             break;
         }
@@ -69,122 +70,96 @@ int kkjserver(char *portnum)
 
     if (addr == NULL)
     {
-        printf("Couldn't bind to port\n");
+        fprintf(stderr, "Could not bind\n");
         return -1;
     }
 
     freeaddrinfo(address_list);
 
+    char message1[1024];
+    int n;
+    char buf[1024];
+    char client[1024];
+
     printf("Waiting for connection\n");
-
-    con = malloc(sizeof(struct connection));
-    con->addr_len = sizeof(struct sockaddr_storage);
-
-    con->fd = accept(sfd, (struct sockaddr *)&con->addr, &con->addr_len);
-
-    if (con->fd == -1)
+    for (;;)
     {
-        perror("accept");
-    }
+        con = malloc(sizeof(struct connection));
+        con->addr_len = sizeof(struct sockaddr_storage);
+        con->fd = accept(sfd, (struct sockaddr *)&con->addr, &con->addr_len);
 
-    /* fcntl(sfd, F_SETFL, O_NONBLOCK); */
-    int n;
-
-    printf("Connected\n");
-    char server_message[20000];
-    strcpy(server_message, "Knock knock");
-    strcat(server_message, "\0");
-    n = write(con->fd, server_message, strlen(server_message));
-    if (n < 0)
-    {
-        perror("Write error");
-    }
-
-    /* if ((send(con->fd, server_message, sizeof(server_message), 0)) == -1)
+        if (con->fd == -1)
         {
-            fprintf(stderr, "Failed to send message\n");
+            perror("accept");
+            continue;
+        }
+
+        char host[100], port[10];
+        int error, nread;
+
+        char sendMssg[1024];
+
+        error = getnameinfo((struct sockaddr *)&con->addr, con->addr_len, host, 100, port, 10, NI_NUMERICSERV);
+
+        if (error != 0)
+        {
+            fprintf(stderr, "getnameinfo: %s", gai_strerror(error));
             close(con->fd);
-            break;
-        } */
+            return -1;
+        }
 
-    echo(con);
+        printf("[%s:%s] connection\n", host, port);
 
-    close(sfd);
+        int i = 0;
+        while (i != 1)
+        {
+            strcpy(message1, "REG|13|Knock, knock.|");
+            strcat(message1, "\0");
+            write(con->fd, message1, strlen(message1));
+            i++;
+        }
 
+        int pipe = 0;
+
+        bzero(buf, 1024);
+        bzero(client, 1024);
+        while ((nread = read(con->fd, buf, 1)) > 0)
+        {
+            if(client == NULL){
+                strcpy(client, buf);
+            } else {
+                strcat(client, buf);
+            }
+
+            if (strcmp(buf, "|") == 0)
+            {
+                pipe++;
+            }
+
+            if (pipe == 3)
+            {
+                break;
+            }
+        }
+
+        printf("Client asked: %s\n", client);
+
+        if (strcmp(client, "REG|12|Who's there?|") == 0)
+        {
+            write(con->fd, "REG|7|orange.|", strlen("REG|7|orange.|"));
+        } else if(strcmp(client, "REG|12|orange, who?|") == 0){
+            write(con->fd, "REG|36|orange you glad I didn't say banana.|", strlen("REG|36|orange you glad I didn't say banana.|"));
+        } else {
+            write(con->fd, "TEST", strlen("TEST"));
+        }
+
+        write(con->fd, "TEST", strlen("TEST"));
+
+        /* bzero(buf, 0);
+        bzero(client, 0); */
+
+    }
+
+    // never reach here
     return 0;
-}
-
-void *echo(struct connection *arg)
-{
-    char host[100], port[10];
-    struct connection *c = arg;
-    int error, nread;
-
-    error = getnameinfo((struct sockaddr *)&c->addr, c->addr_len, host, 100, port, 10, NI_NUMERICSERV);
-
-    if (error != 0)
-    {
-        fprintf(stderr, "getnameinfo: %s", gai_strerror(error));
-        close(c->fd);
-        return NULL;
-    }
-
-    char client_message[1024] = "\n\0";
-    int n;
-
-    while (1)
-    {
-
-        //bzero(client_message, 1024);
-
-        nread = read(c->fd, client_message, 1024);
-        if (nread < 0)
-        {
-            perror("Error on read");
-        }
-
-        printf("Client message: %s\n", client_message);
-
-        bzero(client_message, 1024);
-
-        /* n = 0;
-        while((client_message[n++] = getchar()) != '\0'); */
-
-        // This gets the server response but we dont want the server response fgets(client_message, 1024, stdin);
-
-        n = 0;
-
-        if (strncmp(client_message, "whos there?", 12) != 0)
-        {
-            strncpy(client_message, "orange", 7);
-            n = write(c->fd, client_message, strlen(client_message));
-            if (n < 0)
-            {
-                perror("Write error");
-            }
-        }
-
-        if (strncmp(client_message, "orange who?", 12) != 0)
-        {
-            strncpy(client_message, "orange you glad I didn't say banana", 36);
-            n = write(c->fd, client_message, strlen(client_message));
-            if (n < 0)
-            {
-                perror("Write error");
-            }
-        }
-
-        /* strncpy(client_message, "message failed", 15);
-        n = write(c->fd, client_message, strlen(client_message));
-        if (n < 0)
-        {
-            perror("Write error");
-        } */
-
-        printf("Server sending: %s\n", client_message);
-    }
-
-    close(c->fd);
-    free(c);
-    return NULL;
 }
