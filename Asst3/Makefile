@@ -1,7 +1,8 @@
-all: server client
+CC     = gcc
+CFLAGS = -pthread -g -Wall -fsanitize=address 
 
-server: KKJserver.c
-	gcc -o server -pthread KKJserver.c
+all: Asst3.o
+	$(CC) $(CFLAGS) Asst3.o -lm -o KKJserver
 
-client: KKJclient.c
-	gcc -o client KKJclient.c
+clean:
+	rm -rf $(TARGET) *.o *.a *.dylib *.dSYM KKJserver
