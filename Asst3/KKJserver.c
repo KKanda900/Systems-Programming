@@ -79,7 +79,7 @@ int kkjserver(char *portnum)
     char message1[1024];
     int n;
     char buf[1024];
-    char client[1024];
+    char client[1024]; int pipe;
 
     printf("Waiting for connection\n");
     for (;;)
@@ -97,8 +97,6 @@ int kkjserver(char *portnum)
         char host[100], port[10];
         int error, nread;
 
-        char sendMssg[1024];
-
         error = getnameinfo((struct sockaddr *)&con->addr, con->addr_len, host, 100, port, 10, NI_NUMERICSERV);
 
         if (error != 0)
@@ -110,6 +108,8 @@ int kkjserver(char *portnum)
 
         printf("[%s:%s] connection\n", host, port);
 
+        // This is the read that should first happen
+        // sends the client the start of the knock knoc
         int i = 0;
         while (i != 1)
         {
@@ -119,44 +119,96 @@ int kkjserver(char *portnum)
             i++;
         }
 
-        int pipe = 0;
-
+        // first read, should read the Who's there?
+        pipe = 0;
         bzero(buf, 1024);
         bzero(client, 1024);
         while ((nread = read(con->fd, buf, 1)) > 0)
         {
-            if(client == NULL){
+            if (client == NULL)
+            {
                 strcpy(client, buf);
-            } else {
+            }
+            else
+            {
                 strcat(client, buf);
             }
 
             if (strcmp(buf, "|") == 0)
             {
                 pipe++;
-            }
-
-            if (pipe == 3)
-            {
-                break;
+                if (pipe == 3)
+                {
+                    printf("Client asked: %s\n", client);
+                    break;
+                }
             }
         }
 
-        printf("Client asked: %s\n", client);
+        write(con->fd, "REG|7|orange.|", strlen("REG|7|orange.|"));
 
-        if (strcmp(client, "REG|12|Who's there?|") == 0)
+        bzero(buf, 0);
+        bzero(client, 0);
+
+
+        // second iteration should read "orange who?"
+        pipe = 0;
+        bzero(buf, 1024);
+        bzero(client, 1024);
+        while ((nread = read(con->fd, buf, 1)) > 0)
         {
-            write(con->fd, "REG|7|orange.|", strlen("REG|7|orange.|"));
-        } else if(strcmp(client, "REG|12|orange, who?|") == 0){
-            write(con->fd, "REG|36|orange you glad I didn't say banana.|", strlen("REG|36|orange you glad I didn't say banana.|"));
-        } else {
-            write(con->fd, "TEST", strlen("TEST"));
+            if (client == NULL)
+            {
+                strcpy(client, buf);
+            }
+            else
+            {
+                strcat(client, buf);
+            }
+
+            if (strcmp(buf, "|") == 0)
+            {
+                pipe++;
+                if (pipe == 3)
+                {
+                    printf("Client asked: %s\n", client);
+                    break;
+                }
+            }
         }
 
-        write(con->fd, "TEST", strlen("TEST"));
+        write(con->fd, "REG|36|orange you glad I didn't say banana.|", strlen("REG|36|orange you glad I didn't say banana.|"));
 
-        /* bzero(buf, 0);
-        bzero(client, 0); */
+
+        // third iteration should read the ending a/d/#
+        pipe = 0;
+        bzero(buf, 1024);
+        bzero(client, 1024);
+        while ((nread = read(con->fd, buf, 1)) > 0)
+        {
+            if (client == NULL)
+            {
+                strcpy(client, buf);
+            }
+            else
+            {
+                strcat(client, buf);
+            }
+
+            if (strcmp(buf, "|") == 0)
+            {
+                pipe++;
+                if (pipe == 3)
+                {
+                    printf("Client asked: %s\n", client);
+                    break;
+                }
+            }
+        }
+
+        close(con->fd);
+        free(con);
+
 
     }
 
