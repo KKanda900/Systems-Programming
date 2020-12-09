@@ -1,0 +1,42 @@
+Test Case 1: Accuracy
+
+Situation:
+
+Results:
+
+Explanation of Results:
+
+
+Test Case 2: Correctness
+
+Situation:
+
+Results:
+
+Explanation of Results:
+
+
+Test Case 3: Error Checking #1
+
+Situation:
+
+Results:
+
+Explanation of Results:
+
+
+Test Case 4: Error Checking #2
+
+Situation:
+
+Results:
+
+Explanation of Results:
+
+Test Case 5: Error Checking #3
+
+Situation:
+
+Results:
+
+Explanation of Results:

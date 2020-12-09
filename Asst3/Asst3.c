@@ -8,6 +8,14 @@
 
 #define BACKLOG 5
 
+/*
+ * This struct type is used to hold the attributes for a client.
+ * 
+ * It contains three fields:
+ *  1. The address of the client.
+ *  2. The address length of the client's address.
+ *  3. The file descriptor of the client.
+ */
 struct connection
 {
     struct sockaddr_storage addr;
@@ -15,27 +23,24 @@ struct connection
     int fd;
 };
 
-int kkjserver(char *port);
-void *echo(void *arg);
-
-int main(int argc, char **argv)
-{
-    if (argc != 2)
-    {
-        printf("Please provide a port number: %s [port]\n", argv[0]);
-        exit(1);
-    }
-
-    (void)kkjserver(argv[1]);
-    return 0;
-}
-
+/*
+ * kkjserver function is where the server will start and accept incoming clients then start the joke process. It takes a char pointer 
+ * to a port number that where the server will start from. It is an int function that returns an error if there is an error that happens
+ * upon start but not in the infinite loop. 
+ * 
+ * In the infinite loop the server will constantly run and accept clients one at a time. Upon a client connecting it first sends the inital
+ * knock knock to initiate the joke. Then reads for the next expected response (who's there?) and sends the next question (setup.). After it writes the setup, 
+ * the server waits for the next expected response (setup, who?) then sends the punchline. After the client recieves the punch line, the server is expecting 
+ * a message of annoyance, disgust, or surprise the server closes connection with the current client its working with and starts the next client in queue.
+ * 
+ * When the server reads for the expected response and the expected response turns out incorrect, the server will return an error message
+ * based on the KKJ protocal.  
+ */
 int kkjserver(char *portnum)
 {
     struct addrinfo hint, *address_list, *addr;
     struct connection *con;
     int error, sfd;
-    pthread_t tid;
 
     memset(&hint, 0, sizeof(struct addrinfo));
     hint.ai_family = AF_UNSPEC;
@@ -76,7 +81,6 @@ int kkjserver(char *portnum)
     freeaddrinfo(address_list);
 
     char message1[1024];
-    int n;
     char buf[1024];
     char client[1024]; int pipe;
 
@@ -108,7 +112,7 @@ int kkjserver(char *portnum)
         printf("[%s:%s] connection\n", host, port);
 
         // This is the read that should first happen
-        // sends the client the start of the knock knoc
+        // sends the client the start of the knock knock
         int i = 0;
         while (i != 1)
         {
@@ -197,3 +201,22 @@ int kkjserver(char *portnum)
     // never reach here
     return 0;
 }
+
+/*
+ * The main function will first check if the proper usage was given to start the server. The server should start with the usage:
+ *                              ./KKJserver [port]
+ * Once given the proper usage it will start the KKJserver and should not end once its started. The only reason it should end
+ * is if on the server end, the KKJserver was ended with Ctrl + C or Ctrl + Z.
+ */
+int main(int argc, char **argv)
+{
+    if (argc != 2)
+    {
+        printf("Please provide a port number: %s [port]\n", argv[0]);
+        exit(1);
+    }
+
+    (void)kkjserver(argv[1]);
+    return 0;
+}
+
