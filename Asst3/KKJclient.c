@@ -82,10 +82,9 @@ int main(int argc, char **argv)
         }
         else if (strcmp(client, "REG|36|orange you glad I didn't say banana.|") == 0)
         {
-            write(sock, "||test back|", strlen("||test back|"));
+            write(sock, "woah that was stupid.", strlen("woah that was stupid."));
         }
 
-        write(sock, "||test back|", strlen("||test back|"));
         
         bzero(client, 0);
         bzero(buffer, 0);
