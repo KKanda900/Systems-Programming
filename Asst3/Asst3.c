@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <fcntl.h>
 #include <ctype.h>
 
 #define BACKLOG 5
@@ -117,7 +116,7 @@ char* verifyMessage (char* input, int messageNum)
  * When the server reads for the expected response and the expected response turns out incorrect, the server will return an error message
  * based on the KKJ protocal.  
  */
-int kkjserver(char *portnum)
+void kkjserver(char *portnum)
 {
     struct addrinfo hint, *address_list, *addr;
     struct connection *con;
@@ -132,7 +131,7 @@ int kkjserver(char *portnum)
     if (error != 0)
     {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(error));
-        return -1;
+        return;
     }
 
     for (addr = address_list; addr != NULL; addr = addr->ai_next)
@@ -156,20 +155,20 @@ int kkjserver(char *portnum)
     if (addr == NULL)
     {
         fprintf(stderr, "Could not bind\n");
-        return -1;
+        return;
     }
 
     freeaddrinfo(address_list);
 
-    char message1[1024];
-    char buf[1024];
+    char message[1024];
+    char buf[1];
     char client[1024];
     int pipe;
     char* errorCode;
-    char errorMessage[9];
+    char errorMessage[16];
 
     printf("Waiting for connection\n");
-    for (;;)
+    while (1)
     {
         con = malloc(sizeof(struct connection));
         con->addr_len = sizeof(struct sockaddr_storage);
@@ -177,12 +176,12 @@ int kkjserver(char *portnum)
 
         if (con->fd == -1)
         {
-            perror("accept");
+            perror("accept error");
             continue;
         }
 
         char host[100], port[10];
-        int error, nread;
+        int rwerror;
 
         error = getnameinfo((struct sockaddr *)&con->addr, con->addr_len, host, 100, port, 10, NI_NUMERICSERV);
 
@@ -190,38 +189,27 @@ int kkjserver(char *portnum)
         {
             fprintf(stderr, "getnameinfo: %s", gai_strerror(error));
             close(con->fd);
-            return -1;
+            return;
         }
 
         printf("[%s:%s] connection\n", host, port);
 
         // This is the read that should first happen
         // sends the client the start of the knock knock
-        int i = 0;
-        while (i != 1)
-        {
-            strcpy(message1, "REG|13|Knock, knock.|");
-            strcat(message1, "\0");
-            write(con->fd, message1, strlen(message1));
-            i++;
-        }
+        strcpy(message, "REG|13|Knock, knock.|");
+        strcat(message, "\0");
+        do {
+            rwerror = write(con->fd, message, strlen(message));
+        } while (rwerror == -1);
 
         // first read, should read the Who's there?
         pipe = 0;
-        bzero(buf, 1024);
         bzero(client, 1024);
-        while ((nread = read(con->fd, buf, 1)) > 0)
+        while (read(con->fd, buf, 1) > 0)
         {
-            if (strlen(client) == 0)
-            {
-                strcpy(client, buf);
-            }
-            else
-            {
-                strcat(client, buf);
-            }
+            strcat(client, buf);
 
-            if (strcmp(buf, "|") == 0)
+            if (buf[0] == '|')
             {
                 pipe++;
                 if (pipe == 3)
@@ -231,51 +219,7 @@ int kkjserver(char *portnum)
                 }
             }
         }
-
-        write(con->fd, "REG|7|Orange.|", strlen("REG|7|Orange.|"));
-
-        bzero(buf, 0);
-        bzero(client, 0);
-
-
-        // second iteration should read "orange who?"
-        pipe = 0;
-        bzero(buf, 1024);
-        bzero(client, 1024);
-        while ((nread = read(con->fd, buf, 1)) > 0)
-        {
-            if (strlen(client) == 0)
-            {
-                strcpy(client, buf);
-            }
-            else
-            {
-                strcat(client, buf);
-            }
-
-            if (strcmp(buf, "|") == 0)
-            {
-                pipe++;
-                if (pipe == 3)
-                {
-                    printf("Client asked: %s\n", client);
-                    break;
-                }
-            }
-        }
-
-        write(con->fd, "REG|36|Orange you glad I didn't say banana.|", strlen("REG|36|Orange you glad I didn't say banana.|"));
-        bzero(buf, 0);
-        bzero(client, 0);
-
-
-        // third iteration should read the ending a/d/#
-        pipe = 0;
-        bzero(buf, 1024);
-        bzero(client, 1024);
-        read(con->fd, client, 1024); // assuming the message is any a/d/s
-
-        errorCode = verifyMessage(client, 5);
+        errorCode = verifyMessage(client, 1);
         if (errorCode != NULL)
         {
             if (strcmp(errorCode, "ERROR") == 0) printf("Unrecognized error message respond received: %s", client);
@@ -287,17 +231,100 @@ int kkjserver(char *portnum)
                 strcat(errorMessage, "|");
                 write(con->fd, errorMessage, strlen(errorMessage));
             }
+            free(errorCode);
+            printf("Connection Closed\n");
+            close(con->fd);
+            free(con);
+            continue;
+        }
+
+        // second write
+        strcpy(message, "REG|7|Orange.|");
+        do {
+            rwerror = write(con->fd, message, strlen(message));
+        } while (rwerror == -1);
+
+        // second iteration should read "orange who?"
+        pipe = 0;
+        bzero(client, 1024);
+        while (read(con->fd, buf, 1) > 0)
+        {
+            strcat(client, buf);
+
+            if (buf[0] == '|')
+            {
+                pipe++;
+                if (pipe == 3)
+                {
+                    printf("Client asked: %s\n", client);
+                    break;
+                }
+            }
+        }
+        errorCode = verifyMessage(client, 5);
+        if (errorCode != NULL)
+        {
+            if (strcmp(errorCode, "ERROR") == 0) printf("Unrecognized error message respond received: %s", client);
+            else if (strcmp(errorCode, "ERR") == 0) printf("Error message received: %s", client);
+            else
+            {
+                strcpy(errorMessage, "ERR|");
+                strcat(errorMessage, errorCode);
+                strcat(errorMessage, "|");
+                write(con->fd, errorMessage, strlen(errorMessage));
+                printf("Error msg sent: %s", errorMessage);
+            }
+            free(errorCode);
+            printf("Connection Closed\n");
+            close(con->fd);
+            free(con);
+            continue;
+        }
+
+        // third write
+        strcpy(message, "REG|36|Orange you glad I didn't say banana.|");
+        do {
+            rwerror = write(con->fd, message, strlen(message));
+        } while (rwerror == -1);
+
+
+        // third iteration should read the ending a/d/s
+        pipe = 0;
+        bzero(client, 1024);
+        while (read(con->fd, buf, 1) > 0)
+        {
+            strcat(client, buf);
+
+            if (buf[0] == '|')
+            {
+                pipe++;
+                if (pipe == 3)
+                {
+                    printf("Client asked: %s\n", client);
+                    break;
+                }
+            }
+        }
+        errorCode = verifyMessage(client, 5);
+        if (errorCode != NULL)
+        {
+            if (strcmp(errorCode, "ERROR") == 0) printf("Unrecognized error message respond received: %s", client);
+            else if (strcmp(errorCode, "ERR") == 0) printf("Error message received: %s", client);
+            else
+            {
+                strcpy(errorMessage, "ERR|");
+                strcat(errorMessage, errorCode);
+                strcat(errorMessage, "|");
+                write(con->fd, errorMessage, strlen(errorMessage));
+                printf("Error msg sent: %s", errorMessage);
+            }
+            free(errorCode);
         }
 
         printf("Connection Closed\n");
         close(con->fd);
         free(con);
-
-
     }
-
-    // never reach here
-    return 0;
 }
 
 /*
@@ -314,7 +341,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    (void)kkjserver(argv[1]);
+    kkjserver(argv[1]);
     return 0;
 }
 
