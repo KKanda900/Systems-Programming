@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <fcntl.h>
+#include <ctype.h>
 
 #define BACKLOG 5
 
@@ -22,6 +23,86 @@ struct connection
     socklen_t addr_len;
     int fd;
 };
+
+/*
+ * verifyMessage check if the respond message is valid.
+ *
+ * The function takes two arguments: the input from server and the message# (0-5).
+ * The function returns NULL if the message is a valid REG, returns ERR if it is valid ERR, returns ERROR if it is an
+ * incorrect error message, returns the corresponding error code if it is an incorrect regular message.
+ */
+char* verifyMessage (char* input, int messageNum)
+{
+    int inputlen = (int) strlen(input);
+    char* errorCode = (char*) malloc(5);
+    errorCode[0] = 'M';
+    errorCode[1] = (char) (messageNum + 48);
+    errorCode[2] = 'F';
+    errorCode[3] = 'T';
+    errorCode[4] = '\0';
+
+    if (strncmp(input, "ERR|", 4) == 0) // receiving error code
+    {
+        if (inputlen != 9 || input[4] != 'M' || input[5] < 48 || input[5] > 53 ||
+                strncmp(input+6, "CT|", 3) != 0 || strncmp(input+6, "LN|", 3) != 0 || strncmp(input+6, "FT|", 3) != 0)
+            return "ERROR\0";
+        return "ERR\0\0";
+    }
+
+    if (strncmp(input, "REG|", 4) != 0) return errorCode;
+
+    // check format of respond
+    int sepnum = 1;
+    int msglen = 0;
+    char* msg;
+    for (int i = 4; i < inputlen; i++)
+    {
+        if (input[i] == '|')
+        {
+            sepnum++;
+            if (sepnum == 2)
+            {
+                msglen = i;
+                msg = input + i + 1;
+            }
+            if (sepnum == 3)
+            {
+                msglen = i - msglen - 1;
+                break;
+            }
+        }
+        if (sepnum == 1 && !isdigit(input[i])) return errorCode; // not digit in length field
+    }
+
+    if (sepnum < 3 || inputlen < 7) return errorCode; // no enough '|' or missing field
+
+    if (strtol(input+4, NULL, 10) != msglen) // length not correct
+    {
+        errorCode[2] = 'L';
+        errorCode[3] = 'N';
+        return errorCode;
+    }
+
+    // below is checking for message format
+    errorCode[2] = 'C';
+    errorCode[3] = 'T';
+    if (msglen == 0) return errorCode; // content not correct in any case
+
+    if (messageNum == 1)
+    {
+        if (strncmp(msg, "Who's there?", 12) != 0) return errorCode;
+    }
+    else if (messageNum == 3)
+    {
+        if (strncmp(msg, "Orange, who?", 12) != 0) return errorCode;
+    }
+    else if (messageNum == 5)
+    {
+        if (!ispunct(msg[msglen-1])) return errorCode;
+    }
+
+    return NULL;
+}
 
 /*
  * kkjserver function is where the server will start and accept incoming clients then start the joke process. It takes a char pointer 
@@ -82,7 +163,10 @@ int kkjserver(char *portnum)
 
     char message1[1024];
     char buf[1024];
-    char client[1024]; int pipe;
+    char client[1024];
+    int pipe;
+    char* errorCode;
+    char errorMessage[9];
 
     printf("Waiting for connection\n");
     for (;;)
@@ -128,7 +212,7 @@ int kkjserver(char *portnum)
         bzero(client, 1024);
         while ((nread = read(con->fd, buf, 1)) > 0)
         {
-            if (client == NULL)
+            if (strlen(client) == 0)
             {
                 strcpy(client, buf);
             }
@@ -148,7 +232,7 @@ int kkjserver(char *portnum)
             }
         }
 
-        write(con->fd, "REG|7|orange.|", strlen("REG|7|orange.|"));
+        write(con->fd, "REG|7|Orange.|", strlen("REG|7|Orange.|"));
 
         bzero(buf, 0);
         bzero(client, 0);
@@ -160,7 +244,7 @@ int kkjserver(char *portnum)
         bzero(client, 1024);
         while ((nread = read(con->fd, buf, 1)) > 0)
         {
-            if (client == NULL)
+            if (strlen(client) == 0)
             {
                 strcpy(client, buf);
             }
@@ -180,7 +264,7 @@ int kkjserver(char *portnum)
             }
         }
 
-        write(con->fd, "REG|36|orange you glad I didn't say banana.|", strlen("REG|36|orange you glad I didn't say banana.|"));
+        write(con->fd, "REG|36|Orange you glad I didn't say banana.|", strlen("REG|36|Orange you glad I didn't say banana.|"));
         bzero(buf, 0);
         bzero(client, 0);
 
@@ -190,6 +274,20 @@ int kkjserver(char *portnum)
         bzero(buf, 1024);
         bzero(client, 1024);
         read(con->fd, client, 1024); // assuming the message is any a/d/s
+
+        errorCode = verifyMessage(client, 5);
+        if (errorCode != NULL)
+        {
+            if (strcmp(errorCode, "ERROR") == 0) printf("Unrecognized error message respond received: %s", client);
+            else if (strcmp(errorCode, "ERR") == 0) printf("Error message received: %s", client);
+            else
+            {
+                strcpy(errorMessage, "ERR|");
+                strcat(errorMessage, errorCode);
+                strcat(errorMessage, "|");
+                write(con->fd, errorMessage, strlen(errorMessage));
+            }
+        }
 
         printf("Connection Closed\n");
         close(con->fd);

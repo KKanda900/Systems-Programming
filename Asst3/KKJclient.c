@@ -76,13 +76,13 @@ int main(int argc, char **argv)
         {
             write(sock, "REG|12|Who's there?|", strlen("REG|12|Who's there?|"));
         }
-        else if (strcmp(client, "REG|7|orange.|") == 0)
+        else if (strcmp(client, "REG|7|Orange.|") == 0)
         {
-            write(sock, "REG|12|orange, who?|", strlen("REG|12|orange, who?|"));
+            write(sock, "REG|12|Orange, who?|", strlen("REG|12|Orange, who?|"));
         }
-        else if (strcmp(client, "REG|36|orange you glad I didn't say banana.|") == 0)
+        else if (strcmp(client, "REG|36|Orange you glad I didn't say banana.|") == 0)
         {
-            write(sock, "woah that was stupid.", strlen("woah that was stupid."));
+            write(sock, "Woah that was stupid.", strlen("Woah that was stupid."));
         }
 
         
