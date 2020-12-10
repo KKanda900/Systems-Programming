@@ -24,7 +24,7 @@ struct connection
 };
 
 /*
- * verifyMessage check if the respond message is valid.
+ * verifyMessage checks if the respond message is valid.
  *
  * The function takes two arguments: the input from server and the message# (0-5).
  * The function returns NULL if the message is a valid REG, returns ERR if it is valid ERR, returns ERROR if it is an
@@ -155,13 +155,14 @@ void kkjserver(char *portnum)
     if (addr == NULL)
     {
         fprintf(stderr, "Could not bind\n");
+        freeaddrinfo(address_list);
         return;
     }
 
     freeaddrinfo(address_list);
 
     char message[1024];
-    char buf[1];
+    char buf[1024];
     char client[1024];
     int pipe;
     char* errorCode;
@@ -205,6 +206,7 @@ void kkjserver(char *portnum)
         // first read, should read the Who's there?
         pipe = 0;
         bzero(client, 1024);
+        bzero(buf, 1024);
         while (read(con->fd, buf, 1) > 0)
         {
             strcat(client, buf);
@@ -247,6 +249,7 @@ void kkjserver(char *portnum)
         // second iteration should read "orange who?"
         pipe = 0;
         bzero(client, 1024);
+        bzero(buf, 1024);
         while (read(con->fd, buf, 1) > 0)
         {
             strcat(client, buf);
@@ -291,6 +294,7 @@ void kkjserver(char *portnum)
         // third iteration should read the ending a/d/s
         pipe = 0;
         bzero(client, 1024);
+        bzero(buf, 1024);
         while (read(con->fd, buf, 1) > 0)
         {
             strcat(client, buf);
@@ -344,4 +348,3 @@ int main(int argc, char **argv)
     kkjserver(argv[1]);
     return 0;
 }
-
