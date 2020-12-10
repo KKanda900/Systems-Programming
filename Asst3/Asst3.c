@@ -261,7 +261,7 @@ void kkjserver(char *portnum)
                 }
             }
         }
-        errorCode = verifyMessage(client, 5);
+        errorCode = verifyMessage(client, 3);
         if (errorCode != NULL)
         {
             if (strcmp(errorCode, "ERROR") == 0) printf("Unrecognized error message respond received: %s", client);
