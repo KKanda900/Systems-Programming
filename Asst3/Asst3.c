@@ -26,54 +26,88 @@ struct connection
 /*
  * verifyMessage checks if the respond message is valid.
  *
- * The function takes two arguments: the input from server and the message# (0-5).
+ * The function takes two arguments: the client input and the message# (0-5).
  * The function returns NULL if the message is a valid REG, returns ERR if it is valid ERR, returns ERROR if it is an
  * incorrect error message, returns the corresponding error code if it is an incorrect regular message.
  */
-char* verifyMessage (char* input, int messageNum)
+char* verifyMessage (char* clientInput, int messageNum)
 {
-    int inputlen = (int) strlen(input);
-    char* errorCode = (char*) malloc(5);
+    // getting a substring
+    if (strlen(clientInput) == 0)
+    {
+        perror("Checking empty string");
+        return NULL;
+    }
+
+    char* errorCode = (char*) malloc(8);
+    bzero(errorCode, 8);
     errorCode[0] = 'M';
     errorCode[1] = (char) (messageNum + 48);
     errorCode[2] = 'F';
     errorCode[3] = 'T';
-    errorCode[4] = '\0';
+
+    int inputlen = 0;
+    int sep;
+    if (clientInput[0] == 'E') sep = 2;
+    else if (clientInput[0] == 'R') sep = 3;
+    else return errorCode;
+
+    int sepnum = 0;
+    for (int i = 0; i < strlen(clientInput) && sepnum < sep; i++)
+    {
+        if (clientInput[i] == '|')
+        {
+            sepnum++;
+            inputlen = i + 1;
+        }
+    }
+
+    // move the part of string from clientInput to input
+    char input[1024];
+    bzero(input, 1024);
+    strncpy(input, clientInput, inputlen);
+    char temp[1024];
+    strcpy(temp, clientInput);
+    strncpy(clientInput, temp+inputlen, 1024);
 
     if (strncmp(input, "ERR|", 4) == 0) // receiving error code
     {
+        bzero(errorCode, 8);
         if (inputlen != 9 || input[4] != 'M' || input[5] < 48 || input[5] > 53 ||
                 strncmp(input+6, "CT|", 3) != 0 || strncmp(input+6, "LN|", 3) != 0 || strncmp(input+6, "FT|", 3) != 0)
-            return "ERROR\0";
-        return "ERR\0\0";
+            strcpy(errorCode, "ERROR\0");
+        else
+            strcpy(errorCode, "ERR\0");
+
+        return errorCode;
     }
 
     if (strncmp(input, "REG|", 4) != 0) return errorCode;
 
     // check format of respond
-    int sepnum = 1;
+    int part = 1;
     int msglen = 0;
     char* msg;
     for (int i = 4; i < inputlen; i++)
     {
         if (input[i] == '|')
         {
-            sepnum++;
-            if (sepnum == 2)
+            part++;
+            if (part == 2)
             {
                 msglen = i;
                 msg = input + i + 1;
             }
-            if (sepnum == 3)
+            if (part == 3)
             {
                 msglen = i - msglen - 1;
                 break;
             }
         }
-        if (sepnum == 1 && !isdigit(input[i])) return errorCode; // not digit in length field
+        if (part == 1 && !isdigit(input[i])) return errorCode; // not digit in length field
     }
 
-    if (sepnum < 3 || inputlen < 7) return errorCode; // no enough '|' or missing field
+    if (part < 3 || inputlen < 7) return errorCode; // no enough '|' or missing field
 
     if (strtol(input+4, NULL, 10) != msglen) // length not correct
     {
@@ -162,9 +196,7 @@ void kkjserver(char *portnum)
     freeaddrinfo(address_list);
 
     char message[1024];
-    char buf[1024];
     char client[1024];
-    int pipe;
     char* errorCode;
     char errorMessage[16];
 
@@ -178,11 +210,11 @@ void kkjserver(char *portnum)
         if (con->fd == -1)
         {
             perror("accept error");
+            free(con);
             continue;
         }
 
         char host[100], port[10];
-        int rwerror;
 
         error = getnameinfo((struct sockaddr *)&con->addr, con->addr_len, host, 100, port, 10, NI_NUMERICSERV);
 
@@ -190,36 +222,32 @@ void kkjserver(char *portnum)
         {
             fprintf(stderr, "getnameinfo: %s", gai_strerror(error));
             close(con->fd);
+            free(con);
             return;
         }
 
         printf("[%s:%s] connection\n", host, port);
 
+        bzero(client, 1024);
+
         // This is the read that should first happen
         // sends the client the start of the knock knock
-        strcpy(message, "REG|13|Knock, knock.|");
-        strcat(message, "\0");
-        do {
-            rwerror = write(con->fd, message, strlen(message));
-        } while (rwerror == -1);
+        strcpy(message, "REG|13|Knock, knock.|\0");
+        if (write(con->fd, message, strlen(message)) <= 0)
+        {
+            printf("Connection Closed\n");
+            close(con->fd);
+            free(con);
+            continue;
+        }
 
         // first read, should read the Who's there?
-        pipe = 0;
-        bzero(client, 1024);
-        bzero(buf, 1024);
-        while (read(con->fd, buf, 1) > 0)
+        if (read(con->fd, client, 1023) <= 0)
         {
-            strcat(client, buf);
-
-            if (buf[0] == '|')
-            {
-                pipe++;
-                if (pipe == 3)
-                {
-                    printf("Client asked: %s\n", client);
-                    break;
-                }
-            }
+            printf("Connection Closed\n");
+            close(con->fd);
+            free(con);
+            continue;
         }
         errorCode = verifyMessage(client, 1);
         if (errorCode != NULL)
@@ -241,28 +269,22 @@ void kkjserver(char *portnum)
         }
 
         // second write
-        strcpy(message, "REG|7|Orange.|");
-        do {
-            rwerror = write(con->fd, message, strlen(message));
-        } while (rwerror == -1);
+        strcpy(message, "REG|7|Orange.|\0");
+        if (write(con->fd, message, strlen(message)) <= 0)
+        {
+            printf("Connection Closed\n");
+            close(con->fd);
+            free(con);
+            continue;
+        }
 
         // second iteration should read "orange who?"
-        pipe = 0;
-        bzero(client, 1024);
-        bzero(buf, 1024);
-        while (read(con->fd, buf, 1) > 0)
+        if (read(con->fd, client, 1023) <= 0)
         {
-            strcat(client, buf);
-
-            if (buf[0] == '|')
-            {
-                pipe++;
-                if (pipe == 3)
-                {
-                    printf("Client asked: %s\n", client);
-                    break;
-                }
-            }
+            printf("Connection Closed\n");
+            close(con->fd);
+            free(con);
+            continue;
         }
         errorCode = verifyMessage(client, 3);
         if (errorCode != NULL)
@@ -285,29 +307,22 @@ void kkjserver(char *portnum)
         }
 
         // third write
-        strcpy(message, "REG|36|Orange you glad I didn't say banana.|");
-        do {
-            rwerror = write(con->fd, message, strlen(message));
-        } while (rwerror == -1);
-
+        strcpy(message, "REG|36|Orange you glad I didn't say banana.|\0");
+        if (write(con->fd, message, strlen(message)) <= 0)
+        {
+            printf("Connection Closed\n");
+            close(con->fd);
+            free(con);
+            continue;
+        }
 
         // third iteration should read the ending a/d/s
-        pipe = 0;
-        bzero(client, 1024);
-        bzero(buf, 1024);
-        while (read(con->fd, buf, 1) > 0)
+        if (read(con->fd, client, 1023) <= 0)
         {
-            strcat(client, buf);
-
-            if (buf[0] == '|')
-            {
-                pipe++;
-                if (pipe == 3)
-                {
-                    printf("Client asked: %s\n", client);
-                    break;
-                }
-            }
+            printf("Connection Closed\n");
+            close(con->fd);
+            free(con);
+            continue;
         }
         errorCode = verifyMessage(client, 5);
         if (errorCode != NULL)
