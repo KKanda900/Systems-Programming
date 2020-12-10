@@ -1,6 +1,8 @@
 Test Case 1: Accuracy
 
-Situation:
+Description:
+For this test case we will be testing for accuracy. We will present in this test case the situation where the Client sends the right messages and the wrong messages.
+This will demonstrate the Server is accurate upon sending the right message according to the given response.
 
 Results:
 
@@ -9,34 +11,43 @@ Explanation of Results:
 
 Test Case 2: Correctness
 
-Situation:
+Description: 
+For this test case we want to see the correctness of the server. So the situtation we will present for this case is when the Client sends the proper messages back
+to the server, that the Server will give the right message to the Client to correspond with the KKJ protocal. 
 
 Results:
 
 Explanation of Results:
 
 
-Test Case 3: Error Checking #1
+Test Case 3: Sending Error Codes #1
+
+Description:
+<length errors>
+
+Results:
+
+Explanation of Results:
+
+
+Test Case 4: Sending Error Codes #2
 
 Situation:
+<content errors>
+
+Results:
+
+Explanation of Results:
+
+Test Case 5: Sending Error Codes #3
+
+Situation:
+<Format errors>
 
 Results:
 
 Explanation of Results:
 
 
-Test Case 4: Error Checking #2
 
-Situation:
 
-Results:
-
-Explanation of Results:
-
-Test Case 5: Error Checking #3
-
-Situation:
-
-Results:
-
-Explanation of Results:
