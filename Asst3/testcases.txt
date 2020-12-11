@@ -1,53 +1,144 @@
-Test Case 1: Accuracy
-
-Description:
-For this test case we will be testing for accuracy. We will present in this test case the situation where the Client sends the right messages and the wrong messages.
-This will demonstrate the Server is accurate upon sending the right message according to the given response.
-
-Results:
-
-Explanation of Results:
+"<<< " from client
+">>> " from server
 
 
-Test Case 2: Correctness
+Test Case 1: Runability
 
-Description: 
-For this test case we want to see the correctness of the server. So the situtation we will present for this case is when the Client sends the proper messages back
-to the server, that the Server will give the right message to the Client to correspond with the KKJ protocal. 
+What to expect:
+>>> REG|13|Knock, knock.|
+<<< REG|12|Who's there?|
+>>> REG|7|Orange.|
+<<< REG|12|Orange, who?|
+>>> REG|36|Orange you glad I didn't say banana.|
+<<< REG|21|Woah that was stupid.|
+(connection closed)
 
-Results:
-
-Explanation of Results:
-
-
-Test Case 3: Sending Error Codes #1
-
-Description:
-<length errors>
-
-Results:
-
-Explanation of Results:
+Intention:
+A basic test to see if the server can accept connections and read and write messages with the connected client.
 
 
-Test Case 4: Sending Error Codes #2
+Test Case 2: Reading From Buffer
 
-Situation:
-<content errors>
+What to send:
+>>> REG|13|Knock, knock.|
+<<< REG|12|Who's there?|REG|12|Orange, who?|REG|21|Woah that was stupid
+>>> REG|7|Orange.|
+<<< .
+>>> REG|36|Orange you glad I didn't say banana.|
+<<< |
+(connection closed)
 
-Results:
-
-Explanation of Results:
-
-Test Case 5: Sending Error Codes #3
-
-Situation:
-<Format errors>
-
-Results:
-
-Explanation of Results:
+Intention:
+This is not necessary the correct behavior, but it's to test the read() and buffer is working as expected.
 
 
+Test Case 3: Error Message From Client
+
+What to expect:
+>>> REG|13|Knock, knock.|
+<<< ERR|M0LN|
+(server print out indicates an error message is received from client)
+(connection closed)
+
+Intention:
+Again this is not necessary the correct behavior. It is to test if the server can recognize an error message.
 
 
+Test Case 4: Incorrect Error Message From Client
+
+What to expect:
+>>> REG|13|Knock, knock.|
+<<< ERR|M0AA|
+(server print out indicates an unrecognized error message is received from client)
+(connection closed)
+
+>>> REG|13|Knock, knock.|
+<<< ERR|M0
+<<< |
+(server print out indicates an unrecognized error message is received from client)
+(connection closed)
+
+Intention:
+This is not necessary the correct behavior. It is to test if the server can recognize an error message and tell if it's incorrect.
+
+
+Test Case 5: Error of Message Format Broken
+
+What to expect:
+>>> REG|13|Knock, knock.|
+<<< RNS|12|Who's there?|
+>>> ERR|M1FT|
+(connection closed)
+
+>>> REG|13|Knock, knock.|
+<<< REG12||Who's there?|
+>>> ERR|M1FT|
+(connection closed)
+
+>>> REG|13|Knock, knock.|
+<<< REG|12|Who's there?|
+>>> REG|7|Orange.|
+<<< REG|TLV|Orange, who?|
+>>> ERR|M3FT|
+(connection closed)
+
+>>> REG|13|Knock, knock.|
+<<< REG||Who's there?|
+>>> ERR|M1FT|
+(connection closed)
+
+Intention:
+They're to test if the server can detect wrong message type sent by client.
+
+
+Test Case 6: Error of Incorrect Length Value
+
+What to expect:
+>>> REG|13|Knock, knock.|
+<<< REG|12|Who's there?|
+>>> REG|7|Orange.|
+<<< REG|12|Orange, who?|
+>>> REG|36|Orange you glad I didn't say banana.|
+<<< REG|2|Woah that was stupid.|
+>>> ERR|M5LN|
+(connection closed)
+
+>>> REG|13|Knock, knock.|
+<<< REG|12|Who's there?|
+>>> REG|7|Orange.|
+<<< REG|12|Orange, who?|
+>>> REG|36|Orange you glad I didn't say banana.|
+<<< REG|288|Woah that was stupid.|
+>>> ERR|M5LN|
+(connection closed)
+
+Intension:
+They're to test if the server can detect the length value provided by the client doesn't match the actual length of the message.
+
+
+Test Case 7: Error of Incorrect Content
+
+What to expect:
+>>> REG|13|Knock, knock.|
+<<< REG|10|Whosthere?|
+>>> ERR|M1CT|
+(connection closed)
+
+>>> REG|13|Knock, knock.|
+<<< REG|12|Who's there?|
+>>> REG|7|Orange.|
+<<< REG|12|Yellow, who?|
+>>> ERR|M3CT|
+(connection closed)
+
+>>> REG|13|Knock, knock.|
+<<< REG|12|Who's there?|
+>>> REG|7|Orange.|
+<<< REG|12|Orange, who?|
+>>> REG|36|Orange you glad I didn't say banana.|
+<<< REG|23|Woah that was stupid123|
+>>> ERR|M5CT|
+(connection closed)
+
+Intension:
+They're to test if the server can detect the content of the message is not correct.
