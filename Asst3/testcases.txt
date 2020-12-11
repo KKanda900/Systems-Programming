@@ -23,8 +23,8 @@ What to send:
 >>> REG|13|Knock, knock.|
 <<< REG|12|Who's there?|REG|12|Orange, who?|REG|21|Woah that was stupid
 >>> REG|7|Orange.|
-<<< .
 >>> REG|36|Orange you glad I didn't say banana.|
+<<< .
 <<< |
 (connection closed)
 
