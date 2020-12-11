@@ -112,7 +112,7 @@ What to expect:
 >>> ERR|M5LN|
 (connection closed)
 
-Intension:
+Intention:
 They're to test if the server can detect the length value provided by the client doesn't match the actual length of the message.
 
 
@@ -140,5 +140,5 @@ What to expect:
 >>> ERR|M5CT|
 (connection closed)
 
-Intension:
+Intention:
 They're to test if the server can detect the content of the message is not correct.
